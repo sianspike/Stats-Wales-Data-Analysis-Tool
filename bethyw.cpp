@@ -73,7 +73,7 @@ int BethYw::run(int argc, char *argv[]) {
       // Parse other arguments and import data
       auto datasetsToImport = BethYw::parseDatasetsArg(args);
       auto areasFilter      = BethYw::parseAreasArg(args);
-      // auto measuresFilter   = BethYw::parseMeasuresArg(args);
+      auto measuresFilter   = BethYw::parseMeasuresArg(args);
       // auto yearsFilter      = BethYw::parseYearsArg(args);
 
       Areas data = Areas();
@@ -240,8 +240,6 @@ std::vector<BethYw::InputFileSource> BethYw::parseDatasetsArg(cxxopts::ParseResu
 }
 
 /*
-  TODO: BethYw::parseAreasArg(args)
-  
   Parses the areas command line argument, which is optional. If it doesn't 
   exist or exists and contains "all" as value (any case), all areas should be
   imported, i.e., the filter should be an empty set.
@@ -317,7 +315,33 @@ std::unordered_set<std::string> BethYw::parseAreasArg(cxxopts::ParseResult& args
     std::invalid_argument if the argument contains an invalid measures value
     with the message: Invalid input for measures argument
 */
+std::unordered_set<std::string> BethYw::parseMeasuresArg(cxxopts::ParseResult &args) {
 
+    // The unordered set you will return
+    std::unordered_set<std::string> measures;
+
+    try {
+
+        // Retrieve the areas argument like so:
+        auto temp = args["measures"].as<std::vector<std::string>>();
+
+        for (auto it = temp.begin(); it != temp.end(); it++) {
+
+            if (*it == "all") {
+
+                throw std::domain_error("Argument \"all\" received.");
+            }
+
+            measures.insert(*it);
+        }
+
+    } catch (std::domain_error &e) {
+
+        measures = std::unordered_set<std::string>();
+    }
+
+    return measures;
+}
 
 /*
   TODO: BethYw::parseYearsArg(args)
