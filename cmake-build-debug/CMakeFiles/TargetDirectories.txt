@@ -1,0 +1,3 @@
+/Users/sianpike/Documents/Swansea_University/CSC371/950574/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/Users/sianpike/Documents/Swansea_University/CSC371/950574/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/sianpike/Documents/Swansea_University/CSC371/950574/cmake-build-debug/CMakeFiles/950574.dir
