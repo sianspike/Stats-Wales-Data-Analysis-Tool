@@ -52,41 +52,56 @@
     Exit code
 */
 int BethYw::run(int argc, char *argv[]) {
+
   auto cxxopts = BethYw::cxxoptsSetup();
-  auto args = cxxopts.parse(argc, argv);
 
-  // Print the help usage if requested
-  if (args.count("help")) {
-    std::cerr << cxxopts.help() << std::endl;
-    return 0;
-  }
+  try {
 
-  // Parse data directory argument
-  std::string dir = args["dir"].as<std::string>() + DIR_SEP;
+      auto args = cxxopts.parse(argc, argv);
 
-  // Parse other arguments and import data
-  // auto datasetsToImport = BethYw::parseDatasetsArg(args);
-  // auto areasFilter      = BethYw::parseAreasArg(args);
-  // auto measuresFilter   = BethYw::parseMeasuresArg(args);
-  // auto yearsFilter      = BethYw::parseYearsArg(args);
+      // Print the help usage if requested
+      if (args.count("help")) {
 
-  Areas data = Areas();
+          std::cerr << cxxopts.help() << std::endl;
 
-  // BethYw::loadAreas(data, dir, areasFilter);
-  //
-  // BethYw::loadDatasets(data,
-  //                      dir,
-  //                      datasetsToImport,
-  //                      areasFilter,
-  //                      measuresFilter,
-  //                      yearsFilter);
+          return 0;
+      }
 
-  if (args.count("json")) {
-    // The output as JSON
-    std::cout << data.toJSON() << std::endl;
-  } else {
-    // The output as tables
-    // std::cout << data << std::endl;
+      // Parse data directory argument
+      std::string dir = args["dir"].as<std::string>() + DIR_SEP;
+
+      // Parse other arguments and import data
+      auto datasetsToImport = BethYw::parseDatasetsArg(args);
+      // auto areasFilter      = BethYw::parseAreasArg(args);
+      // auto measuresFilter   = BethYw::parseMeasuresArg(args);
+      // auto yearsFilter      = BethYw::parseYearsArg(args);
+
+      Areas data = Areas();
+
+      // BethYw::loadAreas(data, dir, areasFilter);
+      //
+      // BethYw::loadDatasets(data,
+      //                      dir,
+      //                      datasetsToImport,
+      //                      areasFilter,
+      //                      measuresFilter,
+      //                      yearsFilter);
+
+      if (args.count("json")) {
+
+          // The output as JSON
+          std::cout << data.toJSON() << std::endl;
+
+      } else {
+
+          // The output as tables
+          // std::cout << data << std::endl;
+      }
+  } catch (const cxxopts::OptionParseException &e) {
+
+      std::cout << "There was an error: " << e.what() << std::endl;
+      return 3;
+
   }
 
   return 0;
@@ -176,10 +191,7 @@ cxxopts::Options BethYw::cxxoptsSetup() {
 
     auto datasetsToImport = BethYw::parseDatasetsArg(args);
  */
-std::vector<BethYw::InputFileSource> BethYw::parseDatasetsArg(
-    cxxopts::ParseResult& args) {
-  // This function is incomplete, but to get you started...
-  // You may want to delete much of these // comments too!
+std::vector<BethYw::InputFileSource> BethYw::parseDatasetsArg(cxxopts::ParseResult& args) {
 
   // Retrieve all valid datasets, see datasets.h
   size_t numDatasets = InputFiles::NUM_DATASETS;
@@ -188,19 +200,43 @@ std::vector<BethYw::InputFileSource> BethYw::parseDatasetsArg(
   // Create the container for the return type
   std::vector<InputFileSource> datasetsToImport;
 
-  // You can get the std::vector of arguments from cxxopts like this.
-  // Note that this function will throw an exception if datasets is not set as 
-  // an argument. Check the documentation! Read it and understand it.
-  auto inputDatasets = args["datasets"].as<std::vector<std::string>>();
+  try {
 
-  // You now need to compare the strings in this vector to the keys in
-  // allDatasets above. Populate datasetsToImport with the values
-  // from allDatasets above and then return a vector
+      std::vector<std::string>inputDatasets = args["datasets"].as<std::vector<std::string>>();
 
-  // You'll want to ignore/remove the following lines of code, they simply
-  // import all datasets (for now) as an example to get you started
-  for(unsigned int i = 0; i < numDatasets; i++)
-      datasetsToImport.push_back(allDatasets[i]);
+      for (auto it = inputDatasets.begin(); it != inputDatasets.end(); it++) {
+
+          bool matchFound = false;
+          std::string &code = *it;
+
+          if (code == "all") {
+
+              datasetsToImport.clear();
+              throw std::domain_error("Argument \"all\" received.");
+          }
+
+          for (int i = 0; i < numDatasets; i++) {
+
+              if (allDatasets[i].CODE == code) {
+
+                  matchFound = true;
+                  datasetsToImport.push_back(allDatasets[i]);
+                  break;
+              }
+          }
+
+          if (!matchFound) {
+
+              throw std::invalid_argument("No dataset matches key: " + code);
+          }
+      }
+  } catch (const std::domain_error &e) {
+
+      for(unsigned int i = 0; i < numDatasets; i++) {
+
+          datasetsToImport.push_back(allDatasets[i]);
+      }
+  }
 
   return datasetsToImport;
 }
