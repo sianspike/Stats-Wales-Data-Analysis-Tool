@@ -74,7 +74,7 @@ int BethYw::run(int argc, char *argv[]) {
       auto datasetsToImport = BethYw::parseDatasetsArg(args);
       auto areasFilter      = BethYw::parseAreasArg(args);
       auto measuresFilter   = BethYw::parseMeasuresArg(args);
-      // auto yearsFilter      = BethYw::parseYearsArg(args);
+      auto yearsFilter      = BethYw::parseYearsArg(args);
 
       Areas data = Areas();
 
@@ -366,6 +366,42 @@ std::unordered_set<std::string> BethYw::parseMeasuresArg(cxxopts::ParseResult &a
     std::invalid_argument if the argument contains an invalid years value with
     the message: Invalid input for years argument
 */
+std::tuple<unsigned int, unsigned int> BethYw::parseYearsArg(cxxopts::ParseResult &args) {
+
+    std::tuple<unsigned int, unsigned int> years;
+    unsigned int start_date = 0;
+    unsigned int end_date = 0;
+
+    try {
+
+        // Retrieve the areas argument like so:
+        auto temp = args["years"].as<std::string>();
+        int found = temp.find('-');
+
+        if (found != std::string::npos) {
+
+            start_date = std::stoul(temp.substr(0, found));
+            end_date = std::stoul(temp.substr(found + 1));
+
+        } else {
+
+            start_date = std::stoul(temp);
+            end_date = std::stoul(temp);
+        }
+
+        years = std::make_tuple(start_date, end_date);
+
+    } catch (std::domain_error &e) {
+
+        years = std::make_tuple(start_date, end_date);
+
+    } catch (std::invalid_argument &e) {
+
+        throw std::invalid_argument("Invalid input for years argument");
+    }
+
+    return years;
+}
 
 
 /*

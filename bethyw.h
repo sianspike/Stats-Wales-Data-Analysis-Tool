@@ -62,6 +62,12 @@ std::unordered_set<std::string> parseAreasArg(cxxopts::ParseResult& args);
 */
 std::unordered_set<std::string> parseMeasuresArg(cxxopts::ParseResult& args);
 
+/*
+  Parse the measures argument and return a std::unordered_set of all the
+  measures to import, or an empty set if all measures should be imported.
+*/
+std::tuple<unsigned int, unsigned int> parseYearsArg(cxxopts::ParseResult &args);
+
 } // namespace BethYw
 
 #endif // BETHYW_H_
