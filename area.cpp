@@ -49,7 +49,10 @@ Area::Area(const std::string& localAuthorityCode): local_authority_code(localAut
     ...
     auto authCode = area.getLocalAuthorityCode();
 */
+std::string Area::getLocalAuthorityCode() const {
 
+    return local_authority_code;
+}
 
 /*
   TODO: Area::getName(lang)
@@ -75,7 +78,18 @@ Area::Area(const std::string& localAuthorityCode): local_authority_code(localAut
     ...
     auto name = area.getName(langCode);
 */
+std::string Area::getName(std::string lang) const {
 
+    for (auto it = languages.begin(); it != languages.end(); it++) {
+
+        if (it->first == lang) {
+
+            return it->second;
+        }
+    }
+
+    throw std::out_of_range("lang does not correspond to a language of a name stored.");
+}
 
 /*
   TODO: Area::setName(lang, name)
@@ -102,7 +116,30 @@ Area::Area(const std::string& localAuthorityCode): local_authority_code(localAut
     std::string langValueWelsh = "Powys";
     area.setName(langCodeWelsh, langValueWelsh);
 */
+void Area::setName(std::string lang, std::string name) {
 
+    if (lang.size() != 3) {
+
+        throw std::invalid_argument("Area::setName: Language code must be three alphabetical "
+                                    "letters only");
+    }
+
+    for (auto it = lang.begin(); it != lang.end(); it++) {
+
+        if (!isalpha(*it)) {
+
+            throw std::invalid_argument("Area::setName: Language code must be three alphabetical "
+                                        "letters only");
+        }
+    }
+
+    for (auto it = lang.begin(); it != lang.end(); it++) {
+
+        *it = std::tolower(*it);
+    }
+
+    this->languages.insert({lang, name});
+}
 
 /*
   TODO: Area::getMeasure(key)
@@ -128,7 +165,18 @@ Area::Area(const std::string& localAuthorityCode): local_authority_code(localAut
     ...
     auto measure2 = area.getMeasure("pop");
 */
+Measure Area::getMeasure(std::string key) {
 
+    for (auto it = this->measures.begin(); it != this->measures.end(); it++) {
+
+        if (key == it->first) {
+
+            return it->second;
+        }
+    }
+
+    throw std::out_of_range("No measure found matching " + key);
+}
 
 /*
   TODO: Area::setMeasure(codename, measure)
@@ -162,7 +210,23 @@ Area::Area(const std::string& localAuthorityCode): local_authority_code(localAut
 
     area.setMeasure(code, measure);
 */
+void Area::setMeasure(std::string key, Measure measure) {
 
+    for (auto it = key.begin(); it != key.end(); it++) {
+
+        *it = std::tolower(*it);
+    }
+
+    for (auto it = this->measures.begin(); it != this->measures.end(); it++) {
+
+        if (it->first == key) {
+
+            //merge measure
+        }
+    }
+
+    this->measures.insert({key, measure});
+}
 
 /*
   TODO: Area::size()
@@ -187,6 +251,10 @@ Area::Area(const std::string& localAuthorityCode): local_authority_code(localAut
     area.setMeasure(code, measure);
     auto size = area.size();
 */
+int Area::size() const noexcept {
+
+    return this->measures.size();
+}
 
 
 /*
@@ -220,7 +288,41 @@ Area::Area(const std::string& localAuthorityCode): local_authority_code(localAut
     area.setName("eng", "Powys");
     std::cout << area << std::endl;
 */
+std::ostream &operator<<(std::ostream& os, const Area& area) {
 
+    std::string name;
+    std::string measure;
+
+    if (area.getName("eng").empty() && area.getName("cym").empty()) {
+
+        name = "Unnamed";
+
+    } else if (area.getName("eng").empty()) {
+
+        name = area.getName("cym");
+
+    } else if (area.getName("cym").empty()) {
+
+        name = area.getName("eng");
+
+    } else {
+
+        name = area.getName("eng") + " / " + area.getName("cym");
+    }
+
+    name = name + " (" + area.getLocalAuthorityCode() + ")\n";
+
+    for (auto it = area.measures.begin(); it != area.measures.end(); it++) {
+
+        //measure.getlabel
+        //measure years
+        //measure values
+    }
+
+    os << name << measure;
+
+    return os;
+}
 
 /*
   TODO: operator==(lhs, rhs)
@@ -245,3 +347,10 @@ Area::Area(const std::string& localAuthorityCode): local_authority_code(localAut
 
     bool eq = area1 == area2;
 */
+bool operator==(const Area& lhs, const Area& rhs) {
+
+    //add in comparison for measure
+
+    return (lhs.getLocalAuthorityCode() == rhs.getLocalAuthorityCode()) &&
+    (lhs.languages == rhs.languages);
+}
