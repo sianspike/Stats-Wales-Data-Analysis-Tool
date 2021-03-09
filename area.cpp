@@ -32,8 +32,7 @@
   @example
     Area("W06000023");
 */
-Area::Area(const std::string& localAuthorityCode) {
-  throw std::logic_error("Area::Area() has not been implemented!");
+Area::Area(const std::string& localAuthorityCode): local_authority_code(localAuthorityCode) {
 }
 
 /*

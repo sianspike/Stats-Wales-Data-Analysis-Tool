@@ -25,7 +25,8 @@ SCENARIO( "a source file can be opened and read", "[InputFile][existent]" ) {
     return std::ifstream(path).is_open();
   };
 
-  const std::string test_file = "datasets/areas.csv";
+  const std::string test_file = "/Users/sianpike/Documents/Swansea_University/CSC371/950574"
+                                "/datasets/areas.csv";
   REQUIRE( file_exists(test_file) );
 
   GIVEN( "a valid file path" ) {
@@ -76,7 +77,7 @@ SCENARIO( "a nonexistant source file cannot be opened for reading", "[InputFile]
     return std::ifstream(path).is_open();
   };
   
-  const std::string test_file = "datasets/jibberish.json";
+  const std::string test_file = "/datasets/jibberish.json";
   REQUIRE_FALSE(file_exists(test_file));
 
   GIVEN( "a valid file path" ) {

@@ -19,31 +19,29 @@
 
 #include "input.h"
 
-/*
-  TODO: InputSource::InputSource(source)
+#include <utility>
 
+/*
   Constructor for an InputSource.
 
   @param source
     A unique identifier for a source (i.e. the location).
 */
-InputSource::InputSource(const std::string& source) {
-  throw std::logic_error("InputSource::InputSource() has not been implemented!");
+InputSource::InputSource(std::string  source): source(source) {
 }
 
 /*
-  TODO: InputSource::getSource()
-
   This function should be callable from a constant context.
 
   @return
-    A non-modifable value for the source passed into the construtor.
+    A non-modifable value for the source passed into the constructor.
 */
+std::string InputSource::getSource() const {
 
+    return source;
+}
 
 /*
-  TODO: InputFile:InputFile(path)
-
   Constructor for a file-based source.
 
   @param path
@@ -52,13 +50,10 @@ InputSource::InputSource(const std::string& source) {
   @example
     InputFile input("data/areas.csv");
 */
-InputFile::InputFile(const std::string& filePath) : InputSource(filePath) {
-  throw std::logic_error("InputFile::InputFile() has not been implemented!");
+InputFile::InputFile(const std::string& path) : InputSource(path), file_path(path) {
 }
 
 /*
-  TODO: InputFile::open()
-
   Open a file stream to the file path retrievable from getSource()
   and return a reference to the stream.
 
@@ -73,3 +68,19 @@ InputFile::InputFile(const std::string& filePath) : InputSource(filePath) {
     InputFile input("data/areas.csv");
     input.open();
 */
+std::istream &InputFile::open() {
+
+    file_stream.open(getSource());
+
+    if (!file_stream.is_open()) {
+
+        throw std::runtime_error("InputFile::open: Failed to open file " + getSource());
+    }
+
+    return file_stream;
+}
+
+std::string InputFile::getSource() const {
+
+    return file_path;
+}

@@ -63,8 +63,8 @@ std::unordered_set<std::string> parseAreasArg(cxxopts::ParseResult& args);
 std::unordered_set<std::string> parseMeasuresArg(cxxopts::ParseResult& args);
 
 /*
-  Parse the measures argument and return a std::unordered_set of all the
-  measures to import, or an empty set if all measures should be imported.
+  Parse the years argument and return a std::tuple of all the
+  years to import, or a <0, 0> if all years should be imported.
 */
 std::tuple<unsigned int, unsigned int> parseYearsArg(cxxopts::ParseResult &args);
 

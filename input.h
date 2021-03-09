@@ -35,8 +35,14 @@
   and perhaps additional operators you may wish to overload.
 */
 class InputSource {
+
+private:
+    std::string source;
+
 protected:
-  InputSource(const std::string& source);
+  InputSource(std::string  source);
+  ~InputSource() = default;
+  virtual std::string getSource() const;
 };
 
 /*
@@ -48,8 +54,16 @@ protected:
   to overload.
 */
 class InputFile : public InputSource {
+
+private:
+    std::string file_path;
+    std::ifstream file_stream;
+
 public:
-  InputFile(const std::string& filePath);
+    InputFile(const std::string& path);
+    ~InputFile() = default;
+    virtual std::string getSource() const;
+    std::istream &open();
 };
 
 #endif // INPUT_H_

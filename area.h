@@ -30,6 +30,11 @@
   to overload.
 */
 class Area {
+
+private:
+    const std::string &local_authority_code;
+
+public:
   Area(const std::string& localAuthorityCode);
 };
 

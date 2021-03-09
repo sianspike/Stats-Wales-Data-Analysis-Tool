@@ -101,7 +101,6 @@ int BethYw::run(int argc, char *argv[]) {
 
       std::cout << "There was an error: " << e.what() << std::endl;
       return 3;
-
   }
 
   return 0;
@@ -282,7 +281,7 @@ std::unordered_set<std::string> BethYw::parseAreasArg(cxxopts::ParseResult& args
           areas.insert(*it);
       }
 
-  } catch (std::domain_error &e) {
+  } catch (const std::domain_error &e) {
 
       areas = std::unordered_set<std::string>();
   }
@@ -291,8 +290,6 @@ std::unordered_set<std::string> BethYw::parseAreasArg(cxxopts::ParseResult& args
 }
 
 /*
-  TODO: BethYw::parseMeasuresArg(args)
-
   Parse the measures command line argument, which is optional. If it doesn't 
   exist or exists and contains "all" as value (any case), all measures should
   be imported.
@@ -335,7 +332,7 @@ std::unordered_set<std::string> BethYw::parseMeasuresArg(cxxopts::ParseResult &a
             measures.insert(*it);
         }
 
-    } catch (std::domain_error &e) {
+    } catch (const std::domain_error &e) {
 
         measures = std::unordered_set<std::string>();
     }
@@ -344,8 +341,6 @@ std::unordered_set<std::string> BethYw::parseMeasuresArg(cxxopts::ParseResult &a
 }
 
 /*
-  TODO: BethYw::parseYearsArg(args)
-
   Parse the years command line argument. Years is either a four digit year 
   value, or two four digit year values separated by a hyphen (i.e. either 
   YYYY or YYYY-ZZZZ).
@@ -391,11 +386,11 @@ std::tuple<unsigned int, unsigned int> BethYw::parseYearsArg(cxxopts::ParseResul
 
         years = std::make_tuple(start_date, end_date);
 
-    } catch (std::domain_error &e) {
+    } catch (const std::domain_error &e) {
 
         years = std::make_tuple(start_date, end_date);
 
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
 
         throw std::invalid_argument("Invalid input for years argument");
     }
