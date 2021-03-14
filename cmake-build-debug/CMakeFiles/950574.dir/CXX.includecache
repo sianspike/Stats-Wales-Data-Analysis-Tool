@@ -67,6 +67,8 @@ lib_cxxopts.hpp
 /Users/sianpike/Documents/Swansea_University/CSC371/950574/lib_cxxopts.hpp
 datasets.h
 /Users/sianpike/Documents/Swansea_University/CSC371/950574/datasets.h
+areas.h
+/Users/sianpike/Documents/Swansea_University/CSC371/950574/areas.h
 
 /Users/sianpike/Documents/Swansea_University/CSC371/950574/datasets.h
 string
@@ -111,6 +113,10 @@ optional
 -
 unicode/unistr.h
 -
+
+/Users/sianpike/Documents/Swansea_University/CSC371/950574/main.cpp
+bethyw.h
+/Users/sianpike/Documents/Swansea_University/CSC371/950574/bethyw.h
 
 /Users/sianpike/Documents/Swansea_University/CSC371/950574/measure.h
 string

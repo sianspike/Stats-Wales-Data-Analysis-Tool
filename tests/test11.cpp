@@ -32,7 +32,8 @@ SCENARIO( "areas.csv can be correctly parsed", "[Areas][authorityCodeCSV]" ) {
 
     AND_GIVEN( "a valid areas.csv file as an open std::istream" ) {
 
-      const std::string test_file = "datasets/areas.csv";
+      const std::string test_file = "/Users/sianpike/Documents/Swansea_University/CSC371/950574"
+                                    "/datasets/areas.csv";
       auto stream                 = get_istream(test_file);
 
       REQUIRE( stream.is_open() );

@@ -24,10 +24,13 @@ CMakeFiles/950574.dir/bethyw.cpp.o: ../measure.h
 CMakeFiles/950574.dir/input.cpp.o: ../input.cpp
 CMakeFiles/950574.dir/input.cpp.o: ../input.h
 
+CMakeFiles/950574.dir/main.cpp.o: ../area.h
+CMakeFiles/950574.dir/main.cpp.o: ../areas.h
 CMakeFiles/950574.dir/main.cpp.o: ../bethyw.h
 CMakeFiles/950574.dir/main.cpp.o: ../datasets.h
 CMakeFiles/950574.dir/main.cpp.o: ../lib_cxxopts.hpp
 CMakeFiles/950574.dir/main.cpp.o: ../main.cpp
+CMakeFiles/950574.dir/main.cpp.o: ../measure.h
 
 CMakeFiles/950574.dir/measure.cpp.o: ../measure.cpp
 CMakeFiles/950574.dir/measure.cpp.o: ../measure.h

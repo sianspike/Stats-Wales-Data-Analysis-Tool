@@ -45,7 +45,6 @@ using json = nlohmann::json;
     Areas data = Areas();
 */
 Areas::Areas() {
-  throw std::logic_error("Areas::Areas() has not been implemented!");
 }
 
 /*
@@ -73,6 +72,19 @@ Areas::Areas() {
     Area area(localAuthorityCode);
     data.setArea(localAuthorityCode, area);
 */
+void Areas::setArea(std::string key, Area area) {
+
+    for (auto it = this->areas.begin(); it != this->areas.end(); it++) {
+
+        if (key == it->first) {
+
+            this->areas.erase(key);
+            this->areas.insert({key, area});
+        }
+    }
+
+    this->areas.insert({key, area});
+}
 
 
 /*
@@ -98,7 +110,18 @@ Areas::Areas() {
     ...
     Area area2 = areas.getArea("W06000023");
 */
+Area &Areas::getArea(std::string key) {
 
+    for (auto it = this->areas.begin(); it != this->areas.end(); it++) {
+
+        if (key == it->first) {
+
+            return it->second;
+        }
+    }
+
+    throw std::out_of_range("No area found matching " + key);
+}
 
 /*
   TODO: Areas::size()
@@ -118,7 +141,10 @@ Areas::Areas() {
     
     auto size = areas.size(); // returns 1
 */
+int Areas::size() const noexcept {
 
+    return this->areas.size();
+}
 
 /*
   TODO: Areas::populateFromAuthorityCodeCSV(is, cols, areasFilter)
@@ -157,7 +183,7 @@ Areas::Areas() {
     See bethyw.cpp for details of how the variable areasFilter is created
 
   @example
-    InputFile input("data/areas.csv");
+    InputFile input("datasets/areas.csv");
     auto is = input.open();
 
     auto cols = InputFiles::AREAS.COLS;
@@ -171,12 +197,55 @@ Areas::Areas() {
     std::runtime_error if a parsing error occurs (e.g. due to a malformed file)
     std::out_of_range if there are not enough columns in cols
 */
-void Areas::populateFromAuthorityCodeCSV(
-    std::istream &is,
-    const BethYw::SourceColumnMapping &cols,
-    const StringFilterSet * const areasFilter) {
-  throw std::logic_error(
-    "Areas::populateFromAuthorityCodeCSV() has not been implemented!");
+void Areas::populateFromAuthorityCodeCSV(std::istream &is, const BethYw::SourceColumnMapping &cols,
+                                         const StringFilterSet * const areasFilter) {
+
+    std::string str;
+
+    try {
+
+        std::getline(is, str);
+
+    } catch (std::runtime_error &e) {
+
+        throw std::runtime_error("Error parsing file");
+    }
+
+    while (std::getline(is, str)) {
+
+        bool valid = true;
+        size_t firstComma = str.find(',');
+        size_t secondComma = str.find(',', firstComma + 1);
+        std::string authorityCode = str.substr(0, firstComma);
+
+        if (areasFilter != nullptr && !areasFilter->empty()) {
+
+            for (auto it = areasFilter->begin(); it != areasFilter->end(); it++) {
+
+                if (authorityCode != *it) {
+
+                    valid = false;
+
+                } else {
+
+                    valid = true;
+                    break;
+                }
+            }
+        }
+
+        if (valid) {
+
+            std::string eng = str.substr(firstComma + 1, secondComma - firstComma - 1);
+            std::string cym = str.substr(secondComma + 1, std::string::npos - secondComma);
+
+            Area area = Area(authorityCode);
+
+            area.setName("eng", eng);
+            area.setName("cym", cym);
+            this->areas.insert({authorityCode, area});
+        }
+    }
 }
 
 /*
@@ -404,14 +473,17 @@ void Areas::populateFromAuthorityCodeCSV(
       DataType::WelshStatsJSON,
       cols);
 */
-void Areas::populate(std::istream &is,
-                     const BethYw::SourceDataType &type,
+void Areas::populate(std::istream &is, const BethYw::SourceDataType &type,
                      const BethYw::SourceColumnMapping &cols) {
-  if (type == BethYw::AuthorityCodeCSV) {
-    populateFromAuthorityCodeCSV(is, cols);
-  } else {
-    throw std::runtime_error("Areas::populate: Unexpected data type");
-  }
+
+    if (type == BethYw::AuthorityCodeCSV) {
+
+        populateFromAuthorityCodeCSV(is, cols);
+
+    } else {
+
+        throw std::runtime_error("Areas::populate: Unexpected data type");
+    }
 }
 
 /*

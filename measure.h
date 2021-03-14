@@ -25,7 +25,11 @@
   to overload.
 */
 class Measure {
-  Measure(std::string code, const std::string &label);
+public:
+    std::string codename;
+    std::string label;
+
+    Measure(std::string code, const std::string &label);
 };
 
 #endif // MEASURE_H_
