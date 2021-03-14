@@ -22,8 +22,6 @@
 #include "area.h"
 
 /*
-  TODO: Area::Area(localAuthorityCode)
-
   Construct an Area with a given local authority code.
 
   @param localAuthorityCode
@@ -36,8 +34,6 @@ Area::Area(const std::string& localAuthorityCode): local_authority_code(localAut
 }
 
 /*
-  TODO: Area::getLocalAuthorityCode()
-
   Retrieve the local authority code for this Area. This function should be 
   callable from a constant context and not modify the state of the instance.
   
@@ -55,8 +51,6 @@ std::string Area::getLocalAuthorityCode() const {
 }
 
 /*
-  TODO: Area::getName(lang)
-
   Get a name for the Area in a specific language.  This function should be 
   callable from a constant context and not modify the state of the instance.
 
@@ -92,8 +86,6 @@ std::string Area::getName(std::string lang) const {
 }
 
 /*
-  TODO: Area::setName(lang, name)
-
   Set a name for the Area in a specific language.
 
   @param lang
@@ -142,8 +134,6 @@ void Area::setName(std::string lang, std::string name) {
 }
 
 /*
-  TODO: Area::getMeasure(key)
-
   Retrieve a Measure object, given its codename. This function should be case
   insensitive when searching for a measure.
 
@@ -165,7 +155,7 @@ void Area::setName(std::string lang, std::string name) {
     ...
     auto measure2 = area.getMeasure("pop");
 */
-Measure Area::getMeasure(std::string key) {
+Measure &Area::getMeasure(std::string key) {
 
     for (auto it = this->measures.begin(); it != this->measures.end(); it++) {
 
@@ -179,8 +169,6 @@ Measure Area::getMeasure(std::string key) {
 }
 
 /*
-  TODO: Area::setMeasure(codename, measure)
-
   Add a particular Measure to this Area object. Note that the Measure's
   codename should be converted to lowercase.
 
@@ -221,7 +209,7 @@ void Area::setMeasure(std::string key, Measure measure) {
 
         if (it->first == key) {
 
-            //merge measure
+            it->second = measure;
         }
     }
 
@@ -229,8 +217,6 @@ void Area::setMeasure(std::string key, Measure measure) {
 }
 
 /*
-  TODO: Area::size()
-
   Retrieve the number of Measures we have for this Area. This function should be 
   callable from a constant context, not modify the state of the instance, and
   must promise not throw an exception.
@@ -258,8 +244,6 @@ int Area::size() const noexcept {
 
 
 /*
-  TODO: operator<<(os, area)
-
   Overload the stream output operator as a free/global function.
 
   Output the name of the Area in English and Welsh, followed by the local
@@ -312,21 +296,17 @@ std::ostream &operator<<(std::ostream& os, const Area& area) {
 
     name = name + " (" + area.getLocalAuthorityCode() + ")\n";
 
+    os << name;
+
     for (auto it = area.measures.begin(); it != area.measures.end(); it++) {
 
-        //measure.getlabel
-        //measure years
-        //measure values
+        os << it->second;
     }
-
-    os << name << measure;
 
     return os;
 }
 
 /*
-  TODO: operator==(lhs, rhs)
-
   Overload the == operator for two Area objects as a global/free function. Two
   Area objects are only equal when their local authority code, all names, and
   all data are equal.
@@ -349,8 +329,6 @@ std::ostream &operator<<(std::ostream& os, const Area& area) {
 */
 bool operator==(const Area& lhs, const Area& rhs) {
 
-    //add in comparison for measure
-
     return (lhs.getLocalAuthorityCode() == rhs.getLocalAuthorityCode()) &&
-    (lhs.languages == rhs.languages);
+    (lhs.languages == rhs.languages) && (lhs.measures == rhs.measures);
 }

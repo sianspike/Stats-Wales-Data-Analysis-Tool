@@ -28,11 +28,7 @@
   InputSource is an abstract/purely virtual base class for all input source 
   types. In future versions of our application, we may support multiple input 
   data sources such as files and web pages. Therefore, this virtual class 
-  will allow us to mix/match sources as needed. 
-
-  TODO: Based on your implementation of this class and of dervived classes,
-  there may be additional constructors or functions you implement here,
-  and perhaps additional operators you may wish to overload.
+  will allow us to mix/match sources as needed.
 */
 class InputSource {
 
@@ -48,10 +44,6 @@ protected:
 /*
   Source data that is contained within a file. For now, our application will
   only work with files (and in particular, the files in the datasets directory).
-
-  TODO: Based on your implementation, there may be additional constructors
-  or functions you implement here, and perhaps additional operators you may wish
-  to overload.
 */
 class InputFile : public InputSource {
 

@@ -37,8 +37,6 @@
 using json = nlohmann::json;
 
 /*
-  TODO: Areas::Areas()
-
   Constructor for an Areas object.
 
   @example
@@ -48,8 +46,6 @@ Areas::Areas() {
 }
 
 /*
-  TODO: Areas::setArea(localAuthorityCode, area)
-
   Add a particular Area to the Areas object.
 
   If an Area already exists with the same local authority code, overwrite all
@@ -76,10 +72,11 @@ void Areas::setArea(std::string key, Area area) {
 
     for (auto it = this->areas.begin(); it != this->areas.end(); it++) {
 
-        if (key == it->first) {
+        if (it->first == key) {
 
-            this->areas.erase(key);
+            this->areas.erase(it);
             this->areas.insert({key, area});
+            return;
         }
     }
 
@@ -88,8 +85,6 @@ void Areas::setArea(std::string key, Area area) {
 
 
 /*
-  TODO: Areas::getArea(localAuthorityCode)
-
   Retrieve an Area instance with a given local authority code.
 
   @param key
@@ -124,8 +119,6 @@ Area &Areas::getArea(std::string key) {
 }
 
 /*
-  TODO: Areas::size()
-
   Retrieve the number of Areas within the container. This function should be 
   callable from a constant context, not modify the state of the instance, and
   must promise not throw an exception.
@@ -147,8 +140,6 @@ int Areas::size() const noexcept {
 }
 
 /*
-  TODO: Areas::populateFromAuthorityCodeCSV(is, cols, areasFilter)
-
   This function specifically parses the compiled areas.csv file of local 
   authority codes, and their names in English and Welsh.
 
@@ -422,8 +413,6 @@ void Areas::populateFromAuthorityCodeCSV(std::istream &is, const BethYw::SourceC
 
 
 /*
-  TODO: Areas::populate(is, type, cols)
-
   Parse data from an standard input stream `is`, that has data of a particular
   `type`, and with a given column mapping in `cols`.
 
@@ -487,13 +476,6 @@ void Areas::populate(std::istream &is, const BethYw::SourceDataType &type,
 }
 
 /*
-  TODO: Areas::populate(is,
-                        type,
-                        cols,
-                        areasFilter,
-                        measuresFilter,
-                        yearsFilter)
-
   Parse data from an standard input stream, that is of a particular type,
   and with a given column mapping, filtering for specific areas, measures,
   and years, and fill the container.
@@ -568,19 +550,19 @@ void Areas::populate(std::istream &is, const BethYw::SourceDataType &type,
       &measuresFilter,
       &yearsFilter);
 */
-void Areas::populate(
-    std::istream &is,
-    const BethYw::SourceDataType &type,
-    const BethYw::SourceColumnMapping &cols,
-    const StringFilterSet * const areasFilter,
-    const StringFilterSet * const measuresFilter,
-    const YearFilterTuple * const yearsFilter)
-     {
-  if (type == BethYw::AuthorityCodeCSV) {
-    populateFromAuthorityCodeCSV(is, cols, areasFilter);
-  } else {
-    throw std::runtime_error("Areas::populate: Unexpected data type");
-  }
+void Areas::populate(std::istream &is, const BethYw::SourceDataType &type,
+                     const BethYw::SourceColumnMapping &cols, const StringFilterSet * const
+                     areasFilter, const StringFilterSet * const measuresFilter,
+                     const YearFilterTuple * const yearsFilter) {
+
+    if (type == BethYw::AuthorityCodeCSV) {
+
+        populateFromAuthorityCodeCSV(is, cols, areasFilter);
+
+    } else {
+
+        throw std::runtime_error("Areas::populate: Unexpected data type");
+    }
 }
 
 /*

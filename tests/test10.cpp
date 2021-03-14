@@ -145,6 +145,8 @@ SCENARIO( "an Areas instance can contain Area instances", "[Areas][contain]" ) {
         REQUIRE_NOTHROW( areas.setArea(localAuthorityCode, area1) );
         REQUIRE_NOTHROW( areas.setArea(localAuthorityCode, area2) );
 
+        //REQUIRE_NOTHROW( areas.setArea(localAuthorityCode, areaCombined) );
+
         AND_THEN( "the Areas instance has size 1" ) {
 
           REQUIRE_NOTHROW( areas.size() == 1 );

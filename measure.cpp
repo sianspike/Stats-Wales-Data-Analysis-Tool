@@ -13,9 +13,6 @@
   codename, and a Standard Library container for data. The data you need to 
   store is values, organised by year. I'd recommend storing the values as 
   doubles.
-
-  This file contains numerous functions you must implement. Each function you
-  must implement has a TODO block comment. 
 */
 
 #include <stdexcept>
@@ -24,8 +21,6 @@
 #include "measure.h"
 
 /*
-  TODO: Measure::Measure(codename, label);
-
   Construct a single Measure, that has values across many years.
 
   All StatsWales JSON files have a codename for measures. You should convert 
@@ -54,8 +49,6 @@ Measure::Measure(std::string codename, const std::string &label) {
 }
 
 /*
-  TODO: Measure::getCodename()
-
   Retrieve the code for the Measure. This function should be callable from a 
   constant context and must promise to not modify the state of the instance or 
   throw an exception.
@@ -72,11 +65,12 @@ Measure::Measure(std::string codename, const std::string &label) {
     ...
     auto codename2 = measure.getCodename();
 */
+std::string Measure::getCodename() const noexcept {
 
+    return this->codename;
+}
 
 /*
-  TODO: Measure::getLabel()
-
   Retrieve the human-friendly label for the Measure. This function should be 
   callable from a constant context and must promise to not modify the state of 
   the instance and to not throw an exception.
@@ -93,11 +87,12 @@ Measure::Measure(std::string codename, const std::string &label) {
     ...
     auto label = measure.getLabel();
 */
+std::string Measure::getLabel() const noexcept {
 
+    return this->label;
+}
 
 /*
-  TODO: Measure::setLabel(label)
-
   Change the label for the Measure.
 
   @param label
@@ -109,11 +104,12 @@ Measure::Measure(std::string codename, const std::string &label) {
     ...
     measure.setLabel("New Population");
 */
+void Measure::setLabel(std::string label) {
 
+    this->label = label;
+}
 
 /*
-  TODO: Measure::getValue(key)
-
   Retrieve a Measure's value for a given year.
 
   @param key
@@ -138,11 +134,20 @@ Measure::Measure(std::string codename, const std::string &label) {
     ...
     auto value = measure.getValue(1999); // returns 12345678.9
 */
+double Measure::getValue(int key) {
 
+    for (auto it = years.begin(); it != years.end(); it++) {
+
+        if (it->first == key) {
+
+            return it->second;
+        }
+    }
+
+    throw std::out_of_range("No value found for year " + std::to_string(key));
+}
 
 /*
-  TODO: Measure::setValue(key, value)
-
   Add a particular year's value to the Measure object. If a value already
   exists for the year, replace it.
 
@@ -162,11 +167,20 @@ Measure::Measure(std::string codename, const std::string &label) {
 
     measure.setValue(1999, 12345678.9);
 */
+void Measure::setValue(int key, double value) {
 
+    for (auto it = this->years.begin(); it != this->years.end(); it++) {
+
+        if (it->first == key) {
+
+            it->second = value;
+        }
+    }
+
+    this->years.insert({key, value});
+}
 
 /*
-  TODO: Measure::size()
-
   Retrieve the number of years data we have for this measure. This function
   should be callable from a constant context and must promise to not change
   the state of the instance or throw an exception.
@@ -182,11 +196,12 @@ Measure::Measure(std::string codename, const std::string &label) {
     measure.setValue(1999, 12345678.9);
     auto size = measure.size(); // returns 1
 */
+int Measure::size() {
 
+    return years.size();
+}
 
 /*
-  TODO: Measure::getDifference()
-
   Calculate the difference between the first and last year imported. This
   function should be callable from a constant context and must promise to not
   change the state of the instance or throw an exception.
@@ -201,11 +216,21 @@ Measure::Measure(std::string codename, const std::string &label) {
     measure.setValue(1999, 12345679.9);
     auto diff = measure.getDifference(); // returns 1.0
 */
+double Measure::getDifference() const noexcept {
 
+    double firstYear = this->years.begin()->second;
+    double lastYear = this->years.end()->second;
+    double difference = 0;
+
+    if (firstYear != lastYear) {
+
+        difference = lastYear - firstYear;
+    }
+
+    return difference;
+}
 
 /*
-  TODO: Measure::getDifferenceAsPercentage()
-
   Calculate the difference between the first and last year imported as a 
   percentage. This function should be callable from a constant context and
   must promise to not change the state of the instance or throw an exception.
@@ -220,11 +245,21 @@ Measure::Measure(std::string codename, const std::string &label) {
     measure.setValue(2010, 12345679.9);
     auto diff = measure.getDifferenceAsPercentage();
 */
+double Measure::getDifferenceAsPercentage() const noexcept {
 
+    double firstYear = this->years.begin()->second;
+    double difference = getDifference();
+    double percentage = 0;
+
+    if (difference != 0) {
+
+        percentage = (getDifference() / firstYear) * 100;
+    }
+
+    return percentage;
+}
 
 /*
-  TODO: Measure::getAverage()
-
   Calculate the average/mean value for all the values. This function should be
   callable from a constant context and must promise to not change the state of 
   the instance or throw an exception.
@@ -238,11 +273,22 @@ Measure::Measure(std::string codename, const std::string &label) {
     measure.setValue(1999, 12345679.9);
     auto diff = measure.getDifference(); // returns 1
 */
+double Measure::getAverage() const noexcept {
 
+    double total = 0;
+    double average = 0;
+
+    for (auto it = this->years.begin(); it != this->years.end(); it++) {
+
+        total += it->second;
+    }
+
+    average = total / this->years.size();
+
+    return average;
+}
 
 /*
-  TODO: operator<<(os, measure)
-
   Overload the << operator to print all of the Measure's imported data.
 
   We align the year and value outputs by padding the outputs with spaces,
@@ -276,11 +322,27 @@ Measure::Measure(std::string codename, const std::string &label) {
     measure.setValue(1999, 12345678.9);
     std::cout << measure << std::end;
 */
+std::ostream &operator<<(std::ostream &os, const Measure &measure) {
 
+    std::string firstRow = measure.getLabel() + " (" + measure.getCodename() + ")\n";
+    std::string secondRow;
+    std::string thirdRow = "\n";
+
+    for (auto it = measure.years.begin(); it != measure.years.end(); it++) {
+
+        secondRow += "\t" + std::to_string(it->first);
+        thirdRow += " " + std::to_string(it->second);
+    }
+
+    secondRow += "\tAverage\tDiff.\t% Diff.";
+    thirdRow += " " + std::to_string(measure.getAverage()) + " " +
+            std::to_string(measure.getDifference()) + " " +
+            std::to_string(measure.getDifferenceAsPercentage());
+
+    return os << firstRow << secondRow << thirdRow;
+}
 
 /*
-  TODO: operator==(lhs, rhs)
-
   Overload the == operator for two Measure objects. Two Measure objects
   are only equal when their codename, label and data are all equal.
 
@@ -294,4 +356,8 @@ Measure::Measure(std::string codename, const std::string &label) {
     true if both Measure objects have the same codename, label and data; false
     otherwise
 */
+bool operator==(const Measure& lhs, const Measure& rhs) {
 
+    return ((lhs.getCodename() == rhs.getCodename()) && (lhs.getLabel() == rhs.getLabel()) &&
+    (lhs.years == rhs.years));
+}

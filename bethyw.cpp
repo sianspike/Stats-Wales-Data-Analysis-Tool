@@ -400,8 +400,6 @@ std::tuple<unsigned int, unsigned int> BethYw::parseYearsArg(cxxopts::ParseResul
 
 
 /*
-  TODO: BethYw::loadAreas(areas, dir, areasFilter)
-
   Load the areas.csv file from the directory `dir`. Parse the file and
   create the appropriate Area objects inside the Areas object passed to
   the function in the `areas` argument.

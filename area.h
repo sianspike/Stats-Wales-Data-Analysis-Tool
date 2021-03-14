@@ -28,10 +28,6 @@
   An Area object consists of a unique authority code, a container for names
   for the area in any number of different languages, and a container for the
   Measures objects.
-
-  TODO: Based on your implementation, there may be additional constructors
-  or functions you implement here, and perhaps additional operators you may wish
-  to overload.
 */
 class Area {
 
@@ -45,7 +41,7 @@ public:
   std::string getLocalAuthorityCode() const;
   std::string getName(std::string lang) const;
   void setName(std::string lang, std::string name);
-  Measure getMeasure(std::string key);
+  Measure &getMeasure(std::string key);
   void setMeasure(std::string key, Measure measure);
   int size() const noexcept;
   friend std::ostream &operator<<(std::ostream& os, const Area& area);
