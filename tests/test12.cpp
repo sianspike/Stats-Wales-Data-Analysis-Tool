@@ -32,7 +32,7 @@ SCENARIO( "popu1009.json can be correctly parsed", "[Areas][popu1009]" ) {
 
     AND_GIVEN( "a valid popu1009.json file as an open std::istream" ) {
 
-      const std::string test_file = "datasets/popu1009.json";
+      const std::string test_file = "/Users/sianpike/Documents/Swansea_University/CSC371/950574/datasets/popu1009.json";
       auto stream                 = get_istream(test_file);
 
       REQUIRE( stream.is_open() );

@@ -46,6 +46,8 @@ public:
   int size() const noexcept;
   friend std::ostream &operator<<(std::ostream& os, const Area& area);
   friend bool operator==(const Area& lhs, const Area& rhs);
+  std::map<std::string, std::string> getLanguages() const;
+  std::map<std::string, Measure> getMeasures() const;
 };
 
 #endif // AREA_H_

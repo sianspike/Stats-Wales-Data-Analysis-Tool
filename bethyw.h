@@ -71,6 +71,12 @@ std::tuple<unsigned int, unsigned int> parseYearsArg(cxxopts::ParseResult &args)
 
 void loadAreas(Areas areas, std::string dir, std::unordered_set<std::string> areasFilter);
 
+void loadDatasets(Areas areas, std::string dir,
+                  std::vector<BethYw::InputFileSource> datasetsToImport,
+                  std::unordered_set<std::string> areasFilter,
+                  std::unordered_set<std::string> measuresFilter,
+                  std::tuple<unsigned int,unsigned int> yearsFilter) noexcept;
+
 } // namespace BethYw
 
 #endif // BETHYW_H_

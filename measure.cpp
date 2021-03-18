@@ -361,3 +361,8 @@ bool operator==(const Measure& lhs, const Measure& rhs) {
     return ((lhs.getCodename() == rhs.getCodename()) && (lhs.getLabel() == rhs.getLabel()) &&
     (lhs.years == rhs.years));
 }
+
+std::map<int, double> Measure::getYears() const {
+
+    return this->years;
+}

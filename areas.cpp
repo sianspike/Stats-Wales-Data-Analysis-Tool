@@ -74,9 +74,48 @@ void Areas::setArea(std::string key, Area area) {
 
         if (it->first == key) {
 
-            this->areas.erase(it);
-            this->areas.insert({key, area});
-            return;
+            if (area == it->second) {
+
+                return;
+            }
+
+            std::map<std::string, std::string> newLanguages = area.getLanguages();
+            std::map<std::string, std::string> existingLanguages = it->second.getLanguages();
+
+            for (auto language1 = newLanguages.begin(); language1 != newLanguages.end(); language1++) {
+
+                for (auto language2 = existingLanguages.begin(); language2 != existingLanguages
+                .end(); language2++) {
+
+                    if (language1->first == language2->first && language1->second !=
+                    language2->second) {
+
+                        it->second.setName(language1->first, language1->second);
+
+                    } else if (language1->first != language2->first) {
+
+                        it->second.setName(language1->first, language1->second);
+                    }
+                }
+            }
+
+            std::map<std::string, Measure> newMeasures = area.getMeasures();
+            std::map<std::string, Measure> existingMeasures = it->second.getMeasures();
+
+            for (auto measures1 = newMeasures.begin(); measures1 != newMeasures.end();
+            measures1++) {
+
+                for (auto measures2 = existingMeasures.begin(); measures2 != existingMeasures.end
+                (); measures2++) {
+
+                    if (measures1->second == measures2->second) {
+
+                        return;
+                    }
+
+                    it->second.setMeasure(measures1->first, measures1->second);
+                }
+            }
         }
     }
 
@@ -240,12 +279,6 @@ void Areas::populateFromAuthorityCodeCSV(std::istream &is, const BethYw::SourceC
 }
 
 /*
-  TODO: Areas::populateFromWelshStatsJSON(is,
-                                          cols,
-                                          areasFilter,
-                                          measuresFilter,
-                                          yearsFilter)
-
   Data from StatsWales is in the JSON format, and contains three
   top-level keys: odata.metadata, value, odata.nextLink. value contains the
   data we need. Rather than been hierarchical, it contains data as a
@@ -343,7 +376,33 @@ void Areas::populateFromAuthorityCodeCSV(std::istream &is, const BethYw::SourceC
       &measuresFilter,
       &yearsFilter);
 */
+void Areas::populateFromWelshStatsJSON(std::istream &is, const BethYw::SourceColumnMapping &cols,
+                                       const StringFilterSet *const areasFilter,
+                                       const StringFilterSet *const measuresFilter,
+                                       const YearFilterTuple *const yearsFilter) {
 
+    json j;
+    is >> j;
+
+    for (auto& el : j["value"].items()) {
+
+        auto &data = el.value();
+        std::string localAuthorityCode = data["Localauthority_Code"];
+        std::string englishName = data["Localauthority_ItemName_ENG"];
+        std::string measureCodename = data["Measure_Code"];
+        std::string measureLabel = data["Measure_ItemName_ENG"];
+        std::string measureKey = data["Year_Code"];
+        double measureValue = data["Data"];
+        Area area = Area(localAuthorityCode);
+        Measure measure = Measure(measureCodename, measureLabel);
+
+        measure.setValue(stoi(measureKey), measureValue);
+        area.setName("eng", englishName);
+        area.setMeasure(measureCodename, measure);
+
+        this->setArea(localAuthorityCode, area);
+    }
+}
 
 /*
   TODO: Areas::populateFromAuthorityByYearCSV(is,
@@ -467,7 +526,20 @@ void Areas::populate(std::istream &is, const BethYw::SourceDataType &type,
 
     if (type == BethYw::AuthorityCodeCSV) {
 
-        populateFromAuthorityCodeCSV(is, cols);
+        try {
+
+            populateFromAuthorityCodeCSV(is, cols);
+
+        } catch (std::out_of_range &e) {
+
+            throw std::out_of_range("Not enough columns in cols");
+        }
+
+    } else if (type == BethYw::AuthorityByYearCSV) {
+
+    } else if (type == BethYw::WelshStatsJSON) {
+
+    } else if (type == BethYw::None) {
 
     } else {
 
@@ -557,7 +629,20 @@ void Areas::populate(std::istream &is, const BethYw::SourceDataType &type,
 
     if (type == BethYw::AuthorityCodeCSV) {
 
-        populateFromAuthorityCodeCSV(is, cols, areasFilter);
+        try {
+
+            populateFromAuthorityCodeCSV(is, cols);
+
+        } catch (std::out_of_range &e) {
+
+            throw std::out_of_range("Not enough columns in cols");
+        }
+
+    } else if (type == BethYw::AuthorityByYearCSV) {
+
+    } else if (type == BethYw::WelshStatsJSON) {
+
+    } else if (type == BethYw::None) {
 
     } else {
 
@@ -566,8 +651,6 @@ void Areas::populate(std::istream &is, const BethYw::SourceDataType &type,
 }
 
 /*
-  TODO: Areas::toJSON()
-
   Convert this Areas object, and all its containing Area instances, and
   the Measure instances within those, to values.
 
@@ -639,14 +722,45 @@ void Areas::populate(std::istream &is, const BethYw::SourceDataType &type,
     std::cout << data.toJSON();
 */
 std::string Areas::toJSON() const {
+
   json j;
+  json namesjson;
+  json measuresjson;
+
+  if (this->areas.empty()) {
+
+      j = {{}};
+
+  } else {
+
+      for (auto it = this->areas.begin(); it != this->areas.end(); it++) {
+
+          auto languages = it->second.getLanguages();
+          auto measures = it->second.getMeasures();
+
+          for (auto it1 = languages.begin(); it1 != languages.end(); it1++) {
+
+              namesjson[it1->first] = it1->second;
+          }
+
+          for (auto it2 = measures.begin(); it2 != measures.end(); it2++) {
+
+              auto years = it2->second.getYears();
+
+              for (auto it3 = years.begin(); it3 != years.end(); it3++) {
+
+                  measuresjson[it3->first] = it3->second;
+              }
+          }
+
+          j = json{it->first, {"names", namesjson}, {"measures", measuresjson}};
+      }
+  }
   
   return j.dump();
 }
 
 /*
-  TODO: operator<<(os, areas)
-
   Overload the << operator to print all of the imported data.
 
   Output should be formatted like the following to pass the tests. Areas should
@@ -750,5 +864,8 @@ std::string Areas::toJSON() const {
     Areas areas();
     std::cout << areas << std::end;
 */
+std::ostream &operator<<(std::ostream &os, Areas &areasObject) {
 
+    return os << areasObject.toJSON() << std::endl;
+}
 

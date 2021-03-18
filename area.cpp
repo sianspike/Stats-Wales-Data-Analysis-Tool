@@ -209,7 +209,24 @@ void Area::setMeasure(std::string key, Measure measure) {
 
         if (it->first == key) {
 
-            it->second = measure;
+            if (it->second == measure) {
+
+                return;
+            }
+
+            std::map<int, double> newYears = measure.getYears();
+            std::map<int, double> existingYears = it->second.getYears();
+
+            for (auto years1 = newYears.begin(); years1 != newYears.end(); years1++) {
+
+                for (auto years2 = existingYears.begin(); years2 != existingYears.end(); years2++) {
+
+                    if (years1->first != years2->first) {
+
+                        it->second.setValue(years1->first, years1->second);
+                    }
+                }
+            }
         }
     }
 
@@ -330,5 +347,15 @@ std::ostream &operator<<(std::ostream& os, const Area& area) {
 bool operator==(const Area& lhs, const Area& rhs) {
 
     return (lhs.getLocalAuthorityCode() == rhs.getLocalAuthorityCode()) &&
-    (lhs.languages == rhs.languages) && (lhs.measures == rhs.measures);
+    (lhs.getLanguages() == rhs.getLanguages()) && (lhs.getMeasures() == rhs.getMeasures());
+}
+
+std::map<std::string, std::string> Area::getLanguages() const {
+
+    return this->languages;
+}
+
+std::map<std::string, Measure> Area::getMeasures() const {
+
+    return this->measures;
 }

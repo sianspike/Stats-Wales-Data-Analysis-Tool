@@ -80,6 +80,11 @@ public:
   void setArea(std::string key, Area area);
   Area &getArea(std::string key);
   int size() const noexcept;
+  friend std::ostream &operator<<(std::ostream& os, const Areas& areasObject);
+  void populateFromWelshStatsJSON(std::istream& is, const BethYw::SourceColumnMapping& cols,
+                                  const StringFilterSet * const areasFilter = nullptr,
+                                  const StringFilterSet * const measuresFilter = nullptr,
+                                  const YearFilterTuple * const yearsFilter = nullptr);
 };
 
 #endif // AREAS_H
