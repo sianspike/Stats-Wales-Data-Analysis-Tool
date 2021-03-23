@@ -814,8 +814,10 @@ void Areas::populate(std::istream &is, const BethYw::SourceDataType &type,
 std::string Areas::toJSON() const {
 
   json j;
-  json namesjson;
+  json names;
+  json years;
   json measuresjson;
+  json areasjson;
 
   if (this->areas.empty()) {
 
@@ -830,20 +832,22 @@ std::string Areas::toJSON() const {
 
           for (auto it1 = languages.begin(); it1 != languages.end(); it1++) {
 
-              namesjson[it1->first] = it1->second;
+              names[it1->first] = it1->second;
           }
 
           for (auto it2 = measures.begin(); it2 != measures.end(); it2++) {
 
-              auto years = it2->second.getYears();
+              auto currentYears = it2->second.getYears();
 
-              for (auto it3 = years.begin(); it3 != years.end(); it3++) {
+              for (auto it3 = currentYears.begin(); it3 != currentYears.end(); it3++) {
 
-                  measuresjson[it3->first] = it3->second;
+                  years[std::to_string(it3->first)] = it3->second;
               }
+
+              measuresjson[it2->first] = years;
           }
 
-          j += json{it->first, {"names", namesjson}, {"measures", measuresjson}};
+          j[it->first] = {{"measures", measuresjson}, {"names", names}};
       }
   }
   
