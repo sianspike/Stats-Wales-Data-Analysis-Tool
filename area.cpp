@@ -30,7 +30,7 @@
   @example
     Area("W06000023");
 */
-Area::Area(const std::string& localAuthorityCode): local_authority_code(localAuthorityCode) {
+Area::Area(const std::string localAuthorityCode): local_authority_code(localAuthorityCode) {
 }
 
 /*
@@ -74,12 +74,14 @@ std::string Area::getLocalAuthorityCode() const {
 */
 std::string Area::getName(std::string lang) const {
 
-    for (auto it = languages.begin(); it != languages.end(); it++) {
+    bool exists = false;
+    std::map<std::string, std::string> existingLanguages = this->getLanguages();
 
-        if (it->first == lang) {
+    exists = (existingLanguages.find(lang)->first == lang);
 
-            return it->second;
-        }
+    if (exists) {
+
+        return existingLanguages.find(lang)->second;
     }
 
     throw std::out_of_range("lang does not correspond to a language of a name stored.");
@@ -130,7 +132,19 @@ void Area::setName(std::string lang, std::string name) {
         *it = std::tolower(*it);
     }
 
-    this->languages.insert({lang, name});
+    std::map<std::string, std::string> existingLanguages = this->getLanguages();
+    bool exists = false;
+
+    exists = (existingLanguages.find(lang)->first == lang);
+
+    if (exists) {
+
+        this->languages.find(lang)->second = name;
+
+    } else {
+
+        this->languages.insert({lang, name});
+    }
 }
 
 /*
@@ -155,14 +169,16 @@ void Area::setName(std::string lang, std::string name) {
     ...
     auto measure2 = area.getMeasure("pop");
 */
-Measure &Area::getMeasure(std::string key) {
+Measure Area::getMeasure(const std::string key) const {
 
-    for (auto it = this->measures.begin(); it != this->measures.end(); it++) {
+    bool found = false;
+    std::map<std::string, Measure> measure = this->getMeasures();
 
-        if (key == it->first) {
+    found = (measure.find(key)->first == key);
 
-            return it->second;
-        }
+    if (found) {
+
+        return measure.find(key)->second;
     }
 
     throw std::out_of_range("No measure found matching " + key);
@@ -198,39 +214,32 @@ Measure &Area::getMeasure(std::string key) {
 
     area.setMeasure(code, measure);
 */
-void Area::setMeasure(std::string key, Measure measure) {
+void Area::setMeasure(std::string key, const Measure measure) {
 
     for (auto it = key.begin(); it != key.end(); it++) {
 
         *it = std::tolower(*it);
     }
 
-    for (auto it = this->measures.begin(); it != this->measures.end(); it++) {
+    bool exists;
+    std::map<std::string, Measure> existingMeasures = this->getMeasures();
 
-        if (it->first == key) {
+    exists = (existingMeasures.find(key)->first == key);
 
-            if (it->second == measure) {
+    if (exists) {
 
-                return;
-            }
+        std::map<int, double> existingYears = this->measures.find(key)->second.getYears();
+        std::map<int, double> newYears = measure.getYears();
 
-            std::map<int, double> newYears = measure.getYears();
-            std::map<int, double> existingYears = it->second.getYears();
+        for (auto it = newYears.begin(); it != newYears.end(); it++) {
 
-            for (auto years1 = newYears.begin(); years1 != newYears.end(); years1++) {
-
-                for (auto years2 = existingYears.begin(); years2 != existingYears.end(); years2++) {
-
-                    if (years1->first != years2->first) {
-
-                        it->second.setValue(years1->first, years1->second);
-                    }
-                }
-            }
+            this->measures.find(key)->second.setValue(it->first, it->second);
         }
-    }
 
-    this->measures.insert({key, measure});
+    } else {
+
+        this->measures.insert({key, measure});
+    }
 }
 
 /*
@@ -294,21 +303,11 @@ std::ostream &operator<<(std::ostream& os, const Area& area) {
     std::string name;
     std::string measure;
 
-    if (area.getName("eng").empty() && area.getName("cym").empty()) {
+    auto languages = area.getLanguages();
 
-        name = "Unnamed";
+    for (auto it = languages.begin(); it != languages.end(); it++) {
 
-    } else if (area.getName("eng").empty()) {
-
-        name = area.getName("cym");
-
-    } else if (area.getName("cym").empty()) {
-
-        name = area.getName("eng");
-
-    } else {
-
-        name = area.getName("eng") + " / " + area.getName("cym");
+        name += it->second;
     }
 
     name = name + " (" + area.getLocalAuthorityCode() + ")\n";

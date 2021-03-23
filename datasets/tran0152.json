@@ -1,4 +1,3 @@
-{
   "odata.metadata":"http://open.statswales.gov.wales/en-gb/dataset/$metadata#tran0152","value":[
     {
       "Data":64405.5,"LocalAuthority_Code":"W06000001","LocalAuthority_ItemName_ENG":"Isle of Anglesey","LocalAuthority_SortOrder":"10000","LocalAuthority_Hierarchy":"25","Year_Code":"2002","Year_ItemName_ENG":"2002-03","Year_SortOrder":"11","RowKey":"0000000000000000","PartitionKey":""

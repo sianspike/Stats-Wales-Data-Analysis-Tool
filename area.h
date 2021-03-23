@@ -32,17 +32,17 @@
 class Area {
 
 private:
-    const std::string &local_authority_code;
+    const std::string local_authority_code;
     std::map<std::string, std::string> languages;
     std::map<std::string, Measure> measures;
 
 public:
-  Area(const std::string& localAuthorityCode);
+  Area(const std::string localAuthorityCode);
   std::string getLocalAuthorityCode() const;
   std::string getName(std::string lang) const;
   void setName(std::string lang, std::string name);
-  Measure &getMeasure(std::string key);
-  void setMeasure(std::string key, Measure measure);
+  Measure getMeasure(const std::string key) const;
+  void setMeasure(std::string key, const Measure measure);
   int size() const noexcept;
   friend std::ostream &operator<<(std::ostream& os, const Area& area);
   friend bool operator==(const Area& lhs, const Area& rhs);

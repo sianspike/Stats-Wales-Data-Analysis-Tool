@@ -78,7 +78,7 @@ public:
                 const YearFilterTuple * const yearsFilter = nullptr) noexcept(false);
   std::string toJSON() const;
   void setArea(std::string key, Area area);
-  Area &getArea(std::string key);
+  Area getArea(std::string key);
   int size() const noexcept;
   friend std::ostream &operator<<(std::ostream& os, const Areas& areasObject);
   void populateFromWelshStatsJSON(std::istream& is, const BethYw::SourceColumnMapping& cols,

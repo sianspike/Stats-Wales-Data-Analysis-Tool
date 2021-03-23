@@ -17,6 +17,9 @@
 
 #include <stdexcept>
 #include <string>
+#include <iostream>
+#include <iomanip>
+#include <sstream>
 
 #include "measure.h"
 
@@ -136,12 +139,14 @@ void Measure::setLabel(std::string label) {
 */
 double Measure::getValue(int key) {
 
-    for (auto it = years.begin(); it != years.end(); it++) {
+    std::map<int, double> existingYears = this->getYears();
+    bool found = false;
 
-        if (it->first == key) {
+    found = (existingYears.find(key)->first == key);
 
-            return it->second;
-        }
+    if (found) {
+
+        return years.find(key)->second;
     }
 
     throw std::out_of_range("No value found for year " + std::to_string(key));
@@ -169,15 +174,19 @@ double Measure::getValue(int key) {
 */
 void Measure::setValue(int key, double value) {
 
-    for (auto it = this->years.begin(); it != this->years.end(); it++) {
+    std::map<int, double> existingYears = this->getYears();
+    bool exists = false;
 
-        if (it->first == key) {
+    exists = (existingYears.find(key)->first == key);
 
-            it->second = value;
-        }
+    if (exists) {
+
+        existingYears.find(key)->second = value;
+
+    } else {
+
+        this->years.insert({key, value});
     }
-
-    this->years.insert({key, value});
 }
 
 /*
@@ -218,9 +227,15 @@ int Measure::size() {
 */
 double Measure::getDifference() const noexcept {
 
-    double firstYear = this->years.begin()->second;
-    double lastYear = this->years.end()->second;
+    double firstYear = this->years.begin()->first;
+    double lastYear = firstYear;
     double difference = 0;
+
+    if (this->years.size() > 1) {
+
+        auto thing = --this->years.end();
+        lastYear = thing->first;
+    }
 
     if (firstYear != lastYear) {
 
@@ -253,8 +268,10 @@ double Measure::getDifferenceAsPercentage() const noexcept {
 
     if (difference != 0) {
 
-        percentage = (getDifference() / firstYear) * 100;
+        percentage = (difference / firstYear) * 100;
     }
+
+    percentage = (percentage * 1000000) / 1000000;
 
     return percentage;
 }
@@ -324,22 +341,46 @@ double Measure::getAverage() const noexcept {
 */
 std::ostream &operator<<(std::ostream &os, const Measure &measure) {
 
-    std::string firstRow = measure.getLabel() + " (" + measure.getCodename() + ")\n";
-    std::string secondRow;
-    std::string thirdRow = "\n";
+    std::stringstream first;
+    std::stringstream second;
+    std::stringstream third;
+
+    first << measure.getLabel() << " (" << measure.getCodename() << ")" <<
+          std::endl;
 
     for (auto it = measure.years.begin(); it != measure.years.end(); it++) {
 
-        secondRow += "\t" + std::to_string(it->first);
-        thirdRow += " " + std::to_string(it->second);
+        second << std::right << std::setw(int(std::to_string(it->second).size())) <<
+        std::setfill(' ') << std::to_string(it->first) << ' ';
+
+        third << std::right << std::setw(int(std::to_string(it->second).size())) <<
+        std::setfill(' ') << std::to_string(it->second) << ' ';
     }
 
-    secondRow += "\tAverage\tDiff.\t% Diff.";
-    thirdRow += " " + std::to_string(measure.getAverage()) + " " +
-            std::to_string(measure.getDifference()) + " " +
-            std::to_string(measure.getDifferenceAsPercentage());
+    second << std::right << std::setw(int(std::to_string(measure.getAverage()).size())) <<
+    std::setfill(' ') << "Average" << ' ';
 
-    return os << firstRow << secondRow << thirdRow;
+    second << std::right << std::setw(int(std::to_string(measure.getDifference()).size())) <<
+    std::setfill(' ') << "Diff." << ' ';
+
+    second << std::right <<
+    std::setw(int(std::to_string(measure.getDifferenceAsPercentage()).size())) <<
+    std::setfill(' ') << "% Diff." << std::endl;
+
+    third << std::right << std::setw(int(std::to_string(measure.getAverage()).size())) <<
+    std::setfill(' ') << std::fixed << std::setprecision(6) << std::to_string(measure.getAverage
+    ()) << ' ';
+
+    third << std::right << std::setw(int(std::to_string(measure.getDifference()).size())) <<
+    std::setfill(' ') << std::fixed << std::setprecision(6) << std::to_string(measure
+    .getDifference()) << ' ';
+
+    third << std::right <<
+    std::setw(int(std::to_string(measure.getDifferenceAsPercentage()).size())) <<
+    std::setfill(' ') << std::fixed <<
+    std::setprecision(6) << std::to_string(measure.getDifferenceAsPercentage()) << std::endl;
+
+    return os << first.str() << second.str() << third.str() << std::endl;
 }
 
 /*
