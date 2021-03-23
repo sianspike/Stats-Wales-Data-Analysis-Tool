@@ -18,6 +18,7 @@
 */
 
 #include <stdexcept>
+#include <sstream>
 
 #include "area.h"
 
@@ -300,24 +301,29 @@ int Area::size() const noexcept {
 */
 std::ostream &operator<<(std::ostream& os, const Area& area) {
 
-    std::string name;
-    std::string measure;
+    std::stringstream name;
+    std::stringstream measure;
+    std::map<std::string, std::string> languages = area.getLanguages();
 
-    auto languages = area.getLanguages();
+    name << languages.begin()->second;
 
-    for (auto it = languages.begin(); it != languages.end(); it++) {
+    if (languages.size() > 1) {
 
-        name += it->second;
+        for (auto it = ++languages.begin(); it != languages.end(); it++) {
+
+            name << " /  " << it->second;
+        }
+
     }
 
-    name = name + " (" + area.getLocalAuthorityCode() + ")\n";
-
-    os << name;
+    name << " (" << area.getLocalAuthorityCode() << ")" << std::endl;
 
     for (auto it = area.measures.begin(); it != area.measures.end(); it++) {
 
-        os << it->second;
+        measure << it->second;
     }
+
+    os << name.str() << measure.str() << std::endl;
 
     return os;
 }
