@@ -170,7 +170,7 @@ void Area::setName(std::string lang, std::string name) {
     ...
     auto measure2 = area.getMeasure("pop");
 */
-Measure Area::getMeasure(const std::string key) const {
+Measure &Area::getMeasure(const std::string key) {
 
     bool found = false;
     std::map<std::string, Measure> measure = this->getMeasures();
@@ -179,7 +179,7 @@ Measure Area::getMeasure(const std::string key) const {
 
     if (found) {
 
-        return measure.find(key)->second;
+        return this->measures.find(key)->second;
     }
 
     throw std::out_of_range("No measure found matching " + key);
@@ -305,22 +305,29 @@ std::ostream &operator<<(std::ostream& os, const Area& area) {
     std::stringstream measure;
     std::map<std::string, std::string> languages = area.getLanguages();
 
-    name << languages.begin()->second;
-
     if (languages.size() > 1) {
 
         for (auto it = ++languages.begin(); it != languages.end(); it++) {
 
-            name << " /  " << it->second;
+            name << it->second << " / ";
         }
 
     }
 
+    name << languages.begin()->second;
+
     name << " (" << area.getLocalAuthorityCode() << ")" << std::endl;
 
-    for (auto it = area.measures.begin(); it != area.measures.end(); it++) {
+    if (area.measures.empty()) {
 
-        measure << it->second;
+        measure << "<no measures>";
+
+    } else {
+
+        for (auto it = area.measures.begin(); it != area.measures.end(); it++) {
+
+            measure << it->second;
+        }
     }
 
     os << name.str() << measure.str() << std::endl;

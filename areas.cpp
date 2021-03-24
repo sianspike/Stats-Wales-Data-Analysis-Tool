@@ -24,6 +24,7 @@
 #include <stdexcept>
 #include <tuple>
 #include <unordered_set>
+#include <sstream>
 
 #include "lib_json.hpp"
 
@@ -94,27 +95,6 @@ void Areas::setArea(std::string key, Area area) {
 
         this->areas.insert({key, area});
     }
-
-//    try {
-//
-//        Area existingArea = this->getArea(key);
-//        std::map<std::string, std::string> newLanguages = area.getLanguages();
-//        std::map<std::string, Measure> newMeasures = area.getMeasures();
-//
-//        for (auto it = newLanguages.begin(); it != newLanguages.end(); it++) {
-//
-//            existingArea.setName(it->first, it->second);
-//        }
-//
-//        for (auto it = newMeasures.begin(); it != newMeasures.end(); it++) {
-//
-//            existingArea.setMeasure(it->first, it->second);
-//        }
-//
-//    } catch (std::out_of_range &e) {
-//
-//        this->areas.insert({key, area});
-//    }
 }
 
 
@@ -139,7 +119,7 @@ void Areas::setArea(std::string key, Area area) {
     ...
     Area area2 = areas.getArea("W06000023");
 */
-Area Areas::getArea(std::string key) {
+Area &Areas::getArea(std::string key) {
 
     for (auto it = this->areas.begin(); it != this->areas.end(); it++) {
 
@@ -242,12 +222,32 @@ void Areas::populateFromAuthorityCodeCSV(std::istream &is, const BethYw::SourceC
         size_t firstComma = str.find(',');
         size_t secondComma = str.find(',', firstComma + 1);
         const std::string authorityCode = str.substr(0, firstComma);
+        std::string eng = str.substr(firstComma + 1, secondComma - firstComma - 1);
+        std::string cym = str.substr(secondComma + 1, std::string::npos - secondComma);
+
+        Area area = Area(authorityCode);
+
+        area.setName("eng", eng);
+        area.setName("cym", cym);
 
         if (areasFilter != nullptr && !areasFilter->empty()) {
 
+            for (auto it = eng.begin(); it != eng.end(); it++) {
+
+                *it = std::tolower(*it);
+            }
+
+            for (auto it = cym.begin(); it != cym.end(); it++) {
+
+                *it = std::tolower(*it);
+            }
+
             for (auto it = areasFilter->begin(); it != areasFilter->end(); it++) {
 
-                if (authorityCode != *it) {
+                bool foundEng = eng.find(*it) != eng.npos;
+                bool foundCym = cym.find(*it) != cym.npos;
+
+                if (!foundEng && !foundCym && authorityCode != *it) {
 
                     valid = false;
 
@@ -261,13 +261,6 @@ void Areas::populateFromAuthorityCodeCSV(std::istream &is, const BethYw::SourceC
 
         if (valid) {
 
-            std::string eng = str.substr(firstComma + 1, secondComma - firstComma - 1);
-            std::string cym = str.substr(secondComma + 1, std::string::npos - secondComma);
-
-            Area area = Area(authorityCode);
-
-            area.setName("eng", eng);
-            area.setName("cym", cym);
             this->setArea(authorityCode, area);
         }
     }
@@ -381,7 +374,9 @@ void Areas::populateFromWelshStatsJSON(std::istream &is, const BethYw::SourceCol
 
     for (auto& el : j["value"].items()) {
 
-        bool areaFound = true;
+        bool areaFoundWithCode = true;
+        bool areaFoundWithEnglish = true;
+        bool areaFoundWithWelsh = true;
         bool measureFound = true;
         bool yearFound = true;
         auto &data = el.value();
@@ -460,30 +455,51 @@ void Areas::populateFromWelshStatsJSON(std::istream &is, const BethYw::SourceCol
         area.setName("eng", englishName);
         area.setMeasure(measureCodename, measure);
 
-        if (!areasFilter->empty()) {
+        if (areasFilter != nullptr && !areasFilter->empty()) {
 
-            areaFound = (std::find(areasFilter->begin(), areasFilter->end(), localAuthorityCode) !=
+            for (auto it = englishName.begin(); it != englishName.end(); it++) {
+
+                *it = std::tolower(*it);
+            }
+
+            for (auto it = welshName.begin(); it != welshName.end(); it++) {
+
+                *it = std::tolower(*it);
+            }
+
+            areaFoundWithCode = (std::find(areasFilter->begin(), areasFilter->end(),
+                                     localAuthorityCode) !=
                          areasFilter->end());
+
+            for (auto it = areasFilter->begin(); it != areasFilter->end(); it++) {
+
+                areaFoundWithEnglish = englishName.find(*it) != englishName.npos;
+                areaFoundWithWelsh = welshName.find(*it) != welshName.npos;
+            }
         }
 
-        if (!measuresFilter->empty()) {
+        if (measuresFilter != nullptr && !measuresFilter->empty()) {
 
             measureFound = (std::find(measuresFilter->begin(), measuresFilter->end(),
                                       measure.getCodename()) != measuresFilter->end());
         }
 
-        int startYear = std::get<0>(yearsFilter[0]);
-        int endYear = std::get<1>(yearsFilter[0]);
+        if (yearsFilter != nullptr) {
 
-        if (startYear != 0 && endYear != 0) {
+            int startYear = std::get<0>(yearsFilter[0]);
+            int endYear = std::get<1>(yearsFilter[0]);
 
-            if (stoi(measureKey) < startYear || stoi(measureKey) > endYear) {
+            if (startYear != 0 && endYear != 0) {
 
-                yearFound = false;
+                if (stoi(measureKey) < startYear || stoi(measureKey) > endYear) {
+
+                    yearFound = false;
+                }
             }
         }
 
-        if (areaFound && measureFound && yearFound) {
+        if ((areaFoundWithWelsh || areaFoundWithCode || areaFoundWithEnglish) && measureFound &&
+        yearFound) {
 
             this->setArea(area.getLocalAuthorityCode(), area);
         }
@@ -491,11 +507,6 @@ void Areas::populateFromWelshStatsJSON(std::istream &is, const BethYw::SourceCol
 }
 
 /*
-  TODO: Areas::populateFromAuthorityByYearCSV(is,
-                                              cols,
-                                              areasFilter,
-                                              yearFilter)
-
   This function imports CSV files that contain a single measure. The 
   CSV file consists of columns containing the authority code and years.
   Each row contains an authority code and values for each year (or no value
@@ -520,10 +531,6 @@ void Areas::populateFromWelshStatsJSON(std::istream &is, const BethYw::SourceCol
   @param areasFilter
     An umodifiable pointer to set of umodifiable strings for areas to import,
     or an empty set if all areas should be imported
-
-  @param measuresFilter
-    An umodifiable pointer to set of strings for measures to import, or an empty 
-    set if all measures should be imported
 
   @param yearsFilter
     An umodifiable pointer to an umodifiable tuple of two unsigned integers,
@@ -555,7 +562,194 @@ void Areas::populateFromWelshStatsJSON(std::istream &is, const BethYw::SourceCol
     std::runtime_error if a parsing error occurs (e.g. due to a malformed file)
     std::out_of_range if there are not enough columns in cols
 */
+void Areas::populateFromAuthorityByYearCSV(std::istream &is, const BethYw::SourceColumnMapping &cols,
+                                           const StringFilterSet *const areasFilter,
+                                           const StringFilterSet *const measuresFilter,
+                                           const YearFilterTuple *const yearsFilter) {
 
+    std::string measureCodename;
+    std::string measureLabel;
+    std::string str;
+    std::map<int, double> years;
+
+    try {
+
+        for (auto it = cols.begin(); it != cols.end(); it++) {
+
+            if (it->first == BethYw::SINGLE_MEASURE_CODE) {
+
+                measureCodename = it->second;
+
+            } else if (it->first == BethYw::SINGLE_MEASURE_NAME) {
+
+                measureLabel = it->second;
+            }
+        }
+    } catch (std::out_of_range &e) {
+
+        throw std::out_of_range("There were not enough columns in cols.");
+    }
+
+    try {
+
+        if (std::getline(is, str)) {
+
+            std::vector<int> commas;
+
+            for (unsigned int i = 0; i < str.size(); i++) {
+
+                if (str[i] == ',') {
+
+                    commas.push_back(i);
+                }
+            }
+
+            for (unsigned int j = 0; j < commas.size(); j++) {
+
+                int year = std::stoi(str.substr(commas[j] + 1,
+                                                commas[j + 1] - (commas[j] + 1)));
+
+                years.insert({year, 0});
+            }
+        }
+
+        while (std::getline(is, str)) {
+
+            std::vector<double> values;
+            std::vector<int> commas;
+            Measure measure = Measure(measureCodename, measureLabel);
+
+            for (unsigned int i = 0; i < str.size(); i++) {
+
+                if (str[i] == ',') {
+
+                    commas.push_back(i);
+                }
+            }
+
+            std::string authorityCode = str.substr(0, commas[0]);
+            Area area = Area(authorityCode);
+
+            for (unsigned int j = 0; j < commas.size(); j++) {
+
+                double value = std::stod(str.substr(commas[j] + 1,
+                                                    commas[j + 1] - (commas[j] + 1)));
+
+                values.push_back(value);
+            }
+
+            bool areasValid = true;
+            bool measuresValid = true;
+
+            std::map<std::string, std::string> languages = area.getLanguages();
+            std::string eng;
+            std::string cym;
+
+            for (auto it = languages.begin(); it != languages.end(); it++) {
+
+                if (it->first == "eng") {
+
+                    eng = it->second;
+
+                } else {
+
+                    cym = it->second;
+                }
+            }
+
+            if (areasFilter != nullptr && !areasFilter->empty()) {
+
+                for (auto it = eng.begin(); it != eng.end(); it++) {
+
+                    *it = std::tolower(*it);
+                }
+
+                for (auto it = cym.begin(); it != cym.end(); it++) {
+
+                    *it = std::tolower(*it);
+                }
+
+                for (auto it = areasFilter->begin(); it != areasFilter->end(); it++) {
+
+                    bool foundEng = eng.find(*it) != eng.npos;
+                    bool foundCym = cym.find(*it) != cym.npos;
+
+                    if (!foundEng && !foundCym && authorityCode != *it) {
+
+                        areasValid = false;
+
+                    } else {
+
+                        areasValid = true;
+                        break;
+                    }
+                }
+            }
+
+            for (auto it = measureCodename.begin(); it != measureCodename.end(); it++) {
+
+                *it = std::tolower(*it);
+            }
+
+            if (measuresFilter != nullptr && !measuresFilter->empty()) {
+
+                for (auto it = measuresFilter->begin(); it != measuresFilter->end(); it++) {
+
+                    if (measureCodename != *it) {
+
+                        measuresValid = false;
+
+                    } else {
+
+                        measuresValid = true;
+                        break;
+                    }
+                }
+            }
+
+            if (yearsFilter != nullptr) {
+
+                int startYear = std::get<0>(yearsFilter[0]);
+                int endYear = std::get<1>(yearsFilter[0]);
+
+                if (startYear != 0 && endYear != 0) {
+
+                    int i = 0;
+
+                    for (auto it = years.begin(); it != years.end(); it++) {
+
+                        if (it->first >= startYear && it->first <= endYear) {
+
+                            it->second = values[i];
+                            measure.setValue(it->first, it->second);
+                        }
+
+                        i++;
+                    }
+                }
+            }
+
+            std::map<int, double> measureYears = measure.getYears();
+
+            for (auto it = measureYears.begin(); it != measureYears.end(); it++) {
+
+                if (it->second == 0) {
+
+                    measureYears.erase(it);
+                }
+            }
+
+            if (areasValid && measuresValid) {
+
+                area.setMeasure(measureCodename, measure);
+                this->setArea(authorityCode, area);
+            }
+        }
+    } catch (std::runtime_error &e) {
+
+        throw std::runtime_error("There was an error parsing the file.");
+    }
+}
 
 /*
   Parse data from an standard input stream `is`, that has data of a particular
@@ -623,15 +817,16 @@ void Areas::populate(std::istream &is, const BethYw::SourceDataType &type,
 
     } else if (type == BethYw::AuthorityByYearCSV) {
 
+        populateFromAuthorityByYearCSV(is, cols);
+
     } else if (type == BethYw::WelshStatsJSON) {
 
         populateFromWelshStatsJSON(is, cols);
 
     } else if (type == BethYw::None) {
 
-    } else {
-
         throw std::runtime_error("Areas::populate: Unexpected data type");
+
     }
 }
 
@@ -711,8 +906,9 @@ void Areas::populate(std::istream &is, const BethYw::SourceDataType &type,
       &yearsFilter);
 */
 void Areas::populate(std::istream &is, const BethYw::SourceDataType &type,
-                     const BethYw::SourceColumnMapping &cols, const StringFilterSet * const
-                     areasFilter, const StringFilterSet * const measuresFilter,
+                     const BethYw::SourceColumnMapping &cols,
+                     const StringFilterSet * const areasFilter,
+                     const StringFilterSet * const measuresFilter,
                      const YearFilterTuple * const yearsFilter) {
 
     if (type == BethYw::AuthorityCodeCSV) {
@@ -728,13 +924,13 @@ void Areas::populate(std::istream &is, const BethYw::SourceDataType &type,
 
     } else if (type == BethYw::AuthorityByYearCSV) {
 
+        populateFromAuthorityByYearCSV(is, cols, areasFilter, measuresFilter, yearsFilter);
+
     } else if (type == BethYw::WelshStatsJSON) {
 
         populateFromWelshStatsJSON(is, cols, areasFilter, measuresFilter, yearsFilter);
 
     } else if (type == BethYw::None) {
-
-    } else {
 
         throw std::runtime_error("Areas::populate: Unexpected data type");
     }
@@ -821,7 +1017,7 @@ std::string Areas::toJSON() const {
 
   if (this->areas.empty()) {
 
-      j = {{}};
+      j = json({});
 
   } else {
 

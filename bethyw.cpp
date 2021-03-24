@@ -70,15 +70,33 @@ int BethYw::run(int argc, char *argv[]) {
       // Parse data directory argument
       std::string dir = args["dir"].as<std::string>() + DIR_SEP;
 
+      std::vector<BethYw::InputFileSource> datasetsToImport;
+
       // Parse other arguments and import data
-      auto datasetsToImport = BethYw::parseDatasetsArg(args);
+      try {
+
+          datasetsToImport = BethYw::parseDatasetsArg(args);
+
+      } catch(std::invalid_argument &e) {
+
+          std::cerr << e.what() << std::endl;
+      }
+
       auto areasFilter      = BethYw::parseAreasArg(args);
       auto measuresFilter   = BethYw::parseMeasuresArg(args);
       auto yearsFilter      = BethYw::parseYearsArg(args);
 
       Areas data = Areas();
 
-      BethYw::loadAreas(data, dir, areasFilter);
+      try {
+
+          BethYw::loadAreas(data, dir, areasFilter);
+
+      } catch (std::runtime_error &e) {
+
+          std::cerr << "Error importing dataset:" << std::endl << e.what() << std::endl;
+      }
+
       BethYw::loadDatasets(data, dir, datasetsToImport, areasFilter, measuresFilter, yearsFilter);
 
       if (args.count("json")) {
@@ -206,7 +224,7 @@ std::vector<BethYw::InputFileSource> BethYw::parseDatasetsArg(cxxopts::ParseResu
               throw std::domain_error("Argument \"all\" received.");
           }
 
-          for (int i = 0; i < numDatasets; i++) {
+          for (unsigned int i = 0; i < numDatasets; i++) {
 
               if (allDatasets[i].CODE == code) {
 
@@ -367,7 +385,7 @@ std::tuple<unsigned int, unsigned int> BethYw::parseYearsArg(cxxopts::ParseResul
         auto temp = args["years"].as<std::string>();
         int found = temp.find('-');
 
-        if (found != std::string::npos) {
+        if (found != (int) std::string::npos) {
 
             start_date = std::stoul(temp.substr(0, found));
             end_date = std::stoul(temp.substr(found + 1));

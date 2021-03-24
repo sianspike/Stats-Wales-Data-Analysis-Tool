@@ -38,7 +38,7 @@ public:
     double getAverage() const noexcept;
     friend std::ostream &operator<<(std::ostream &os, const Measure &measure);
     friend bool operator==(const Measure& lhs, const Measure& rhs);
-    std::map<int, double> getYears() const;
+    std::map<int, double> getYears() const noexcept;
 };
 
 #endif // MEASURE_H_

@@ -41,7 +41,7 @@ public:
   std::string getLocalAuthorityCode() const;
   std::string getName(std::string lang) const;
   void setName(std::string lang, std::string name);
-  Measure getMeasure(const std::string key) const;
+  Measure &getMeasure(const std::string key);
   void setMeasure(std::string key, const Measure measure);
   int size() const noexcept;
   friend std::ostream &operator<<(std::ostream& os, const Area& area);

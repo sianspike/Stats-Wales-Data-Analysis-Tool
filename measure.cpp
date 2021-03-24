@@ -49,6 +49,7 @@ Measure::Measure(std::string codename, const std::string &label) {
 
     this->codename = codename;
     this->label = label;
+    this->years = std::map<int, double>();
 }
 
 /*
@@ -139,7 +140,7 @@ void Measure::setLabel(std::string label) {
 */
 double Measure::getValue(int key) {
 
-    std::map<int, double> existingYears = this->getYears();
+    std::map<int, double> existingYears = getYears();
     bool found = false;
 
     found = (existingYears.find(key)->first == key);
@@ -181,7 +182,7 @@ void Measure::setValue(int key, double value) {
 
     if (exists) {
 
-        existingYears.find(key)->second = value;
+        this->years.find(key)->second = value;
 
     } else {
 
@@ -227,19 +228,21 @@ int Measure::size() {
 */
 double Measure::getDifference() const noexcept {
 
-    double firstYear = this->years.begin()->first;
-    double lastYear = firstYear;
+    int firstYear = this->years.begin()->first;
+    int lastYear = firstYear;
+    double firstYearValue = this->years.begin()->second;
+    double lastYearValue = firstYearValue;
     double difference = 0;
 
     if (this->years.size() > 1) {
 
-        auto thing = --this->years.end();
-        lastYear = thing->first;
+        lastYear = (--this->years.end())->first;
+        lastYearValue = (--this->years.end())->second;
     }
 
     if (firstYear != lastYear) {
 
-        difference = lastYear - firstYear;
+        difference = lastYearValue - firstYearValue;
     }
 
     return difference;
@@ -403,7 +406,7 @@ bool operator==(const Measure& lhs, const Measure& rhs) {
     (lhs.years == rhs.years));
 }
 
-std::map<int, double> Measure::getYears() const {
+std::map<int, double> Measure::getYears() const noexcept {
 
     return this->years;
 }

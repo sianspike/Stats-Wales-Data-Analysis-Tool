@@ -56,10 +56,6 @@ using AreasContainer = std::map<std::string, Area>;
   populate data inside an Areas instance. This function will hand off the
   specific parsing of code to other functions, based on the value of 
   BethYw::SourceDataType.
-
-  TODO: Based on your implementation, there may be additional constructors
-  or functions you implement here, and perhaps additional operators you may wish
-  to overload.
 */
 class Areas {
 private:
@@ -78,13 +74,17 @@ public:
                 const YearFilterTuple * const yearsFilter = nullptr) noexcept(false);
   std::string toJSON() const;
   void setArea(std::string key, Area area);
-  Area getArea(std::string key);
+  Area &getArea(std::string key);
   int size() const noexcept;
   friend std::ostream &operator<<(std::ostream& os, const Areas& areasObject);
   void populateFromWelshStatsJSON(std::istream& is, const BethYw::SourceColumnMapping& cols,
                                   const StringFilterSet * const areasFilter = nullptr,
                                   const StringFilterSet * const measuresFilter = nullptr,
                                   const YearFilterTuple * const yearsFilter = nullptr);
+  void populateFromAuthorityByYearCSV(std::istream &is, const BethYw::SourceColumnMapping &cols,
+                                               const StringFilterSet *const areasFilter = nullptr,
+                                               const StringFilterSet *const measuresFilter = nullptr,
+                                               const YearFilterTuple *const yearsFilter = nullptr);
 };
 
 #endif // AREAS_H
