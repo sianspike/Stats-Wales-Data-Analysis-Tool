@@ -20,6 +20,7 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
+#include <utility>
 
 #include "measure.h"
 
@@ -97,10 +98,10 @@ std::string Measure::getLabel() const noexcept {
 }
 
 /*
-  Change the label for the Measure.
+  Change the newLabel for the Measure.
 
-  @param label
-    The new label for the Measure
+  @param newLabel
+    The new newLabel for the Measure
 
   @example
     Measure measure("pop", "Population");
@@ -108,9 +109,9 @@ std::string Measure::getLabel() const noexcept {
     ...
     measure.setLabel("New Population");
 */
-void Measure::setLabel(std::string label) {
+void Measure::setLabel(std::string newLabel) {
 
-    this->label = label;
+    this->label = std::move(newLabel);
 }
 
 /*
@@ -176,7 +177,7 @@ double Measure::getValue(int key) {
 void Measure::setValue(int key, double value) {
 
     std::map<int, double> existingYears = this->getYears();
-    bool exists = false;
+    bool exists;
 
     exists = (existingYears.find(key)->first == key);
 
@@ -212,6 +213,9 @@ int Measure::size() {
 }
 
 /*
+  REFERENCES:
+  https://stackoverflow.com/questions/289715/last-key-in-a-stdmap
+
   Calculate the difference between the first and last year imported. This
   function should be callable from a constant context and must promise to not
   change the state of the instance or throw an exception.
@@ -249,7 +253,18 @@ double Measure::getDifference() const noexcept {
 }
 
 /*
-  Calculate the difference between the first and last year imported as a 
+  REFERENCES:
+  https://stackoverflow.com/questions/12764009/how-to-cut-decimal-off-without-rounding-in-c
+  https://www.daniweb.com/programming/software-development/code/217332/round-double-to-n-decimal-places
+  https://stackoverflow.com/questions/3844010/convert-a-double-to-fixed-decimal-point-in-c
+  https://stackoverflow.com/questions/1343890/how-do-i-restrict-a-float-value-to-only-two-places
+  -after-the-decimal-point-in-c
+  https://www.quora.com/How-can-I-round-a-double-number-to-3-decimal-digits-in-C++
+  https://www.codegrepper.com/code-examples/typescript/how+to+round+upto+6+digits+in+cpp
+  https://en.cppreference.com/w/cpp/numeric/math/round
+  https://stackoverflow.com/questions/9849535/how-to-round-a-double-to-n-decimals
+
+  Calculate the difference between the first and last year imported as a
   percentage. This function should be callable from a constant context and
   must promise to not change the state of the instance or throw an exception.
 
@@ -274,6 +289,7 @@ double Measure::getDifferenceAsPercentage() const noexcept {
         percentage = (difference / firstYear) * 100;
     }
 
+    //make 6 decimal places.
     percentage = (percentage * 1000000) / 1000000;
 
     return percentage;
@@ -296,7 +312,7 @@ double Measure::getDifferenceAsPercentage() const noexcept {
 double Measure::getAverage() const noexcept {
 
     double total = 0;
-    double average = 0;
+    double average;
 
     for (auto it = this->years.begin(); it != this->years.end(); it++) {
 
@@ -309,6 +325,14 @@ double Measure::getAverage() const noexcept {
 }
 
 /*
+  REFERENCES:
+  https://stackoverflow.com/questions/49000762/c-ostream-operator-overloading-text-formatting
+  -while-trying-to-skip-over-inter
+  https://stackoverflow.com/questions/49332013/adding-a-new-line-after-stdostream-output-without
+  -explicitly-calling-it
+  https://stackoverflow.com/questions/35399642/c-ostream-overloading-problems
+  https://www.codegrepper.com/code-examples/cpp/overloading+ostream+operator+c%2B%2B
+
   Overload the << operator to print all of the Measure's imported data.
 
   We align the year and value outputs by padding the outputs with spaces,

@@ -29,7 +29,7 @@ public:
     Measure(std::string code, const std::string &label);
     std::string getCodename() const noexcept;
     std::string getLabel() const noexcept;
-    void setLabel(std::string label);
+    void setLabel(std::string newLabel);
     double getValue(int key);
     void setValue(int key, double value);
     int size();

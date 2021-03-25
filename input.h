@@ -36,7 +36,7 @@ private:
     std::string source;
 
 protected:
-  InputSource(std::string  source);
+  InputSource(std::string source);
   ~InputSource() = default;
   virtual std::string getSource() const;
 };
@@ -52,9 +52,9 @@ private:
     std::ifstream file_stream;
 
 public:
-    InputFile(const std::string& path);
+    explicit InputFile(const std::string& path);
     ~InputFile() = default;
-    virtual std::string getSource() const;
+    std::string getSource() const override;
     std::istream &open();
 };
 

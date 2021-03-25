@@ -69,12 +69,12 @@ std::unordered_set<std::string> parseMeasuresArg(cxxopts::ParseResult& args);
 */
 std::tuple<unsigned int, unsigned int> parseYearsArg(cxxopts::ParseResult &args);
 
-void loadAreas(Areas &areas, std::string dir, std::unordered_set<std::string> areasFilter);
+void loadAreas(Areas &areas, const std::string& dir, const std::unordered_set<std::string>& areasFilter);
 
-void loadDatasets(Areas &areas, std::string dir,
+void loadDatasets(Areas &areas, const std::string& dir,
                   std::vector<BethYw::InputFileSource> datasetsToImport,
-                  std::unordered_set<std::string> areasFilter,
-                  std::unordered_set<std::string> measuresFilter,
+                  const std::unordered_set<std::string>& areasFilter,
+                  const std::unordered_set<std::string>& measuresFilter,
                   std::tuple<unsigned int,unsigned int> yearsFilter) noexcept;
 
 } // namespace BethYw

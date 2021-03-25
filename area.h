@@ -37,12 +37,12 @@ private:
     std::map<std::string, Measure> measures;
 
 public:
-  Area(const std::string localAuthorityCode);
+  Area(std::string localAuthorityCode);
   std::string getLocalAuthorityCode() const;
-  std::string getName(std::string lang) const;
-  void setName(std::string lang, std::string name);
-  Measure &getMeasure(const std::string key);
-  void setMeasure(std::string key, const Measure measure);
+  std::string getName(const std::string& lang) const;
+  void setName(std::string lang, const std::string& name);
+  Measure &getMeasure(const std::string& key);
+  void setMeasure(std::string key, const Measure& measure);
   int size() const noexcept;
   friend std::ostream &operator<<(std::ostream& os, const Area& area);
   friend bool operator==(const Area& lhs, const Area& rhs);

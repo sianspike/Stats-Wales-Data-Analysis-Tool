@@ -19,6 +19,7 @@
 
 #include <stdexcept>
 #include <sstream>
+#include <utility>
 
 #include "area.h"
 
@@ -31,7 +32,7 @@
   @example
     Area("W06000023");
 */
-Area::Area(const std::string localAuthorityCode): local_authority_code(localAuthorityCode) {
+Area::Area(std::string  localAuthorityCode): local_authority_code(std::move(localAuthorityCode)) {
 }
 
 /*
@@ -73,9 +74,9 @@ std::string Area::getLocalAuthorityCode() const {
     ...
     auto name = area.getName(langCode);
 */
-std::string Area::getName(std::string lang) const {
+std::string Area::getName(const std::string& lang) const {
 
-    bool exists = false;
+    bool exists;
     std::map<std::string, std::string> existingLanguages = this->getLanguages();
 
     exists = (existingLanguages.find(lang)->first == lang);
@@ -89,6 +90,10 @@ std::string Area::getName(std::string lang) const {
 }
 
 /*
+  REFERENCES:
+  http://www.cplusplus.com/forum/beginner/186225/
+
+
   Set a name for the Area in a specific language.
 
   @param lang
@@ -111,7 +116,7 @@ std::string Area::getName(std::string lang) const {
     std::string langValueWelsh = "Powys";
     area.setName(langCodeWelsh, langValueWelsh);
 */
-void Area::setName(std::string lang, std::string name) {
+void Area::setName(std::string lang, const std::string& name) {
 
     if (lang.size() != 3) {
 
@@ -134,7 +139,7 @@ void Area::setName(std::string lang, std::string name) {
     }
 
     std::map<std::string, std::string> existingLanguages = this->getLanguages();
-    bool exists = false;
+    bool exists;
 
     exists = (existingLanguages.find(lang)->first == lang);
 
@@ -170,9 +175,9 @@ void Area::setName(std::string lang, std::string name) {
     ...
     auto measure2 = area.getMeasure("pop");
 */
-Measure &Area::getMeasure(const std::string key) {
+Measure &Area::getMeasure(const std::string& key) {
 
-    bool found = false;
+    bool found;
     std::map<std::string, Measure> measure = this->getMeasures();
 
     found = (measure.find(key)->first == key);
@@ -215,7 +220,7 @@ Measure &Area::getMeasure(const std::string key) {
 
     area.setMeasure(code, measure);
 */
-void Area::setMeasure(std::string key, const Measure measure) {
+void Area::setMeasure(std::string key, const Measure& measure) {
 
     for (auto it = key.begin(); it != key.end(); it++) {
 
@@ -271,6 +276,14 @@ int Area::size() const noexcept {
 
 
 /*
+  REFERENCES:
+  https://stackoverflow.com/questions/49000762/c-ostream-operator-overloading-text-formatting
+  -while-trying-to-skip-over-inter
+  https://stackoverflow.com/questions/49332013/adding-a-new-line-after-stdostream-output-without
+  -explicitly-calling-it
+  https://stackoverflow.com/questions/35399642/c-ostream-overloading-problems
+  https://www.codegrepper.com/code-examples/cpp/overloading+ostream+operator+c%2B%2B
+
   Overload the stream output operator as a free/global function.
 
   Output the name of the Area in English and Welsh, followed by the local
@@ -305,17 +318,16 @@ std::ostream &operator<<(std::ostream& os, const Area& area) {
     std::stringstream measure;
     std::map<std::string, std::string> languages = area.getLanguages();
 
+    //If there is a welsh name, add that to the name stream.
     if (languages.size() > 1) {
 
         for (auto it = ++languages.begin(); it != languages.end(); it++) {
 
             name << it->second << " / ";
         }
-
     }
 
     name << languages.begin()->second;
-
     name << " (" << area.getLocalAuthorityCode() << ")" << std::endl;
 
     if (area.measures.empty()) {
@@ -330,9 +342,7 @@ std::ostream &operator<<(std::ostream& os, const Area& area) {
         }
     }
 
-    os << name.str() << measure.str() << std::endl;
-
-    return os;
+    return os << name.str() << measure.str() << std::endl;
 }
 
 /*

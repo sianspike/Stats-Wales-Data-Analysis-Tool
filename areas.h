@@ -43,6 +43,10 @@ using StringFilterSet = std::unordered_set<std::string>;
 using YearFilterTuple = std::tuple<unsigned int, unsigned int>;
 
 /*
+  REFERENCES:
+  https://en.cppreference.com/w/cpp/language/type_alias - AreasContainer
+
+
   An alias for the data within an Areas object stores Area objects.
 */
 using AreasContainer = std::map<std::string, Area>;
@@ -73,8 +77,8 @@ public:
                 const StringFilterSet * const measuresFilter = nullptr,
                 const YearFilterTuple * const yearsFilter = nullptr) noexcept(false);
   std::string toJSON() const;
-  void setArea(std::string key, Area area);
-  Area &getArea(std::string key);
+  void setArea(const std::string& key, const Area& area);
+  Area &getArea(const std::string& key);
   int size() const noexcept;
   friend std::ostream &operator<<(std::ostream& os, const Areas& areasObject);
   void populateFromWelshStatsJSON(std::istream& is, const BethYw::SourceColumnMapping& cols,

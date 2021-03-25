@@ -13,13 +13,6 @@
   don't need a class here. Classes are for modelling data, and so forth, but
   here the code is pretty much a sequential block of code (BethYw::run())
   calling a series of helper functions.
-
-  TODO: This file contains numerous functions you must implement. Each one
-  is denoted with a TODO in the block comment. Note that some code has been
-  provided in some functions to get you started, but you should read through
-  this code and make sure it is safe and complete. You may need to remove or
-  modify the provided code to get your program to work fully. You may implement
-  additional functions not specified.
 */
 
 #include <iostream>
@@ -444,8 +437,8 @@ std::tuple<unsigned int, unsigned int> BethYw::parseYearsArg(cxxopts::ParseResul
 
     BethYw::loadAreas(areas, "data", BethYw::parseAreasArg(args));
 */
-void BethYw::loadAreas(Areas &areas, std::string dir, std::unordered_set<std::string>
-        areasFilter) {
+void BethYw::loadAreas(Areas &areas, const std::string& dir,
+                       const std::unordered_set<std::string>& areasFilter) {
 
     std::string filePath = dir + "areas.csv";
 
@@ -502,10 +495,10 @@ void BethYw::loadAreas(Areas &areas, std::string dir, std::unordered_set<std::st
       BethYw::parseMeasuresArg(args),
       BethYw::parseYearsArg(args));
 */
-void BethYw::loadDatasets(Areas &areas, std::string dir,
+void BethYw::loadDatasets(Areas &areas, const std::string& dir,
                           std::vector<BethYw::InputFileSource> datasetsToImport,
-                          std::unordered_set<std::string> areasFilter,
-                          std::unordered_set<std::string> measuresFilter,
+                          const std::unordered_set<std::string>& areasFilter,
+                          const std::unordered_set<std::string>& measuresFilter,
                           std::tuple<unsigned int, unsigned int> yearsFilter) noexcept {
 
     for (auto it = datasetsToImport.begin(); it != datasetsToImport.end(); it++) {

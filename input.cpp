@@ -27,7 +27,7 @@
   @param source
     A unique identifier for a source (i.e. the location).
 */
-InputSource::InputSource(std::string  source): source(source) {
+InputSource::InputSource(std::string source): source(std::move(source)) {
 }
 
 /*
@@ -54,6 +54,20 @@ InputFile::InputFile(const std::string& path) : InputSource(path), file_path(pat
 }
 
 /*
+
+ REFERENCES:
+  https://stackoverflow.com/questions/36057028/throw-exception-if-the-file-does-not-exist-in
+ -constructor-and-try-catch-it-when
+ https://www.cplusplus.com/doc/oldtutorial/files/
+ http://www.cplusplus.com/reference/istream/istream/istream/
+ https://stackoverflow.com/questions/2399375/returning-ifstream-in-a-function
+ https://stackoverflow.com/questions/843083/open-file-by-its-full-path-in-c
+ https://stackoverflow.com/questions/11991657/returning-a-reference-to-istream-in-c
+ https://www.cplusplus.com/doc/tutorial/files/
+ https://www.educba.com/c-plus-plus-read-file/
+ https://www3.ntu.edu.sg/home/ehchua/programming/cpp/cp10_IO.html
+
+
   Open a file stream to the file path retrievable from getSource()
   and return a reference to the stream.
 

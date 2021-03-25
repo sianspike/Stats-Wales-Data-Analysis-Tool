@@ -43,8 +43,7 @@ using json = nlohmann::json;
   @example
     Areas data = Areas();
 */
-Areas::Areas() {
-}
+Areas::Areas() = default;
 
 /*
   Add a particular Area to the Areas object.
@@ -69,7 +68,7 @@ Areas::Areas() {
     Area area(localAuthorityCode);
     data.setArea(localAuthorityCode, area);
 */
-void Areas::setArea(std::string key, Area area) {
+void Areas::setArea(const std::string& key, const Area& area) {
 
     bool exists = false;
     AreasContainer existingAreas = this->areas;
@@ -97,7 +96,6 @@ void Areas::setArea(std::string key, Area area) {
     }
 }
 
-
 /*
   Retrieve an Area instance with a given local authority code.
 
@@ -119,7 +117,7 @@ void Areas::setArea(std::string key, Area area) {
     ...
     Area area2 = areas.getArea("W06000023");
 */
-Area &Areas::getArea(std::string key) {
+Area &Areas::getArea(const std::string& key) {
 
     for (auto it = this->areas.begin(); it != this->areas.end(); it++) {
 
@@ -154,6 +152,20 @@ int Areas::size() const noexcept {
 }
 
 /*
+  REFERENCES:
+  https://stackoverflow.com/questions/2340281/check-if-a-string-contains-a-string-in-c
+  http://www.cplusplus.com/reference/string/string/getline/
+  http://www.cplusplus.com/reference/istream/istream/getline/
+  https://en.cppreference.com/w/cpp/utility/tuple/get
+  https://stackoverflow.com/questions/43233894/tuple-stdget-not-working-for-variable-defined
+  -constant
+  https://www.geeksforgeeks.org/tuples-in-c/
+  http://www.cplusplus.com/reference/tuple/tuple/
+  https://en.cppreference.com/w/cpp/utility/tuple
+  https://stackoverflow.com/questions/11279715/nullptr-and-checking-if-a-pointer-points-to-a-valid
+  -object
+  https://stackoverflow.com/questions/2099882/checking-for-a-null-object-in-c
+
   This function specifically parses the compiled areas.csv file of local 
   authority codes, and their names in English and Welsh.
 
@@ -218,6 +230,7 @@ void Areas::populateFromAuthorityCodeCSV(std::istream &is, const BethYw::SourceC
 
     while (std::getline(is, str)) {
 
+        //get all occurences of commas in the current line.
         bool valid = true;
         size_t firstComma = str.find(',');
         size_t secondComma = str.find(',', firstComma + 1);
@@ -230,6 +243,7 @@ void Areas::populateFromAuthorityCodeCSV(std::istream &is, const BethYw::SourceC
         area.setName("eng", eng);
         area.setName("cym", cym);
 
+        //filter out areas.
         if (areasFilter != nullptr && !areasFilter->empty()) {
 
             for (auto it = eng.begin(); it != eng.end(); it++) {
@@ -242,10 +256,11 @@ void Areas::populateFromAuthorityCodeCSV(std::istream &is, const BethYw::SourceC
                 *it = std::tolower(*it);
             }
 
+            //filter using area name or authority code.
             for (auto it = areasFilter->begin(); it != areasFilter->end(); it++) {
 
-                bool foundEng = eng.find(*it) != eng.npos;
-                bool foundCym = cym.find(*it) != cym.npos;
+                bool foundEng = eng.find(*it) != std::string::npos;
+                bool foundCym = cym.find(*it) != std::string::npos;
 
                 if (!foundEng && !foundCym && authorityCode != *it) {
 
@@ -267,6 +282,21 @@ void Areas::populateFromAuthorityCodeCSV(std::istream &is, const BethYw::SourceC
 }
 
 /*
+  REFERENCES:
+  https://www.w3schools.com/cpp/cpp_switch.asp
+  https://stackoverflow.com/questions/2340281/check-if-a-string-contains-a-string-in-c
+  http://www.cplusplus.com/reference/string/string/getline/
+  http://www.cplusplus.com/reference/istream/istream/getline/
+  https://en.cppreference.com/w/cpp/utility/tuple/get
+  https://stackoverflow.com/questions/43233894/tuple-stdget-not-working-for-variable-defined
+  -constant
+  https://www.geeksforgeeks.org/tuples-in-c/
+  http://www.cplusplus.com/reference/tuple/tuple/
+  https://en.cppreference.com/w/cpp/utility/tuple
+  https://stackoverflow.com/questions/11279715/nullptr-and-checking-if-a-pointer-points-to-a-valid
+  -object
+  https://stackoverflow.com/questions/2099882/checking-for-a-null-object-in-c
+
   Data from StatsWales is in the JSON format, and contains three
   top-level keys: odata.metadata, value, odata.nextLink. value contains the
   data we need. Rather than been hierarchical, it contains data as a
@@ -388,6 +418,7 @@ void Areas::populateFromWelshStatsJSON(std::istream &is, const BethYw::SourceCol
         std::string measureKey;
         double measureValue;
 
+        //Assign data from file to variables.
         for (auto it = cols.begin(); it != cols.end(); it++) {
 
             switch (it->first) {
@@ -455,6 +486,7 @@ void Areas::populateFromWelshStatsJSON(std::istream &is, const BethYw::SourceCol
         area.setName("eng", englishName);
         area.setMeasure(measureCodename, measure);
 
+        //area filtering.
         if (areasFilter != nullptr && !areasFilter->empty()) {
 
             for (auto it = englishName.begin(); it != englishName.end(); it++) {
@@ -467,23 +499,27 @@ void Areas::populateFromWelshStatsJSON(std::istream &is, const BethYw::SourceCol
                 *it = std::tolower(*it);
             }
 
+            //filter using authority code.
             areaFoundWithCode = (std::find(areasFilter->begin(), areasFilter->end(),
                                      localAuthorityCode) !=
                          areasFilter->end());
 
+            //filter using name.
             for (auto it = areasFilter->begin(); it != areasFilter->end(); it++) {
 
-                areaFoundWithEnglish = englishName.find(*it) != englishName.npos;
-                areaFoundWithWelsh = welshName.find(*it) != welshName.npos;
+                areaFoundWithEnglish = englishName.find(*it) != std::string::npos;
+                areaFoundWithWelsh = welshName.find(*it) != std::string::npos;
             }
         }
 
+        //measure filtering.
         if (measuresFilter != nullptr && !measuresFilter->empty()) {
 
             measureFound = (std::find(measuresFilter->begin(), measuresFilter->end(),
                                       measure.getCodename()) != measuresFilter->end());
         }
 
+        //years filtering.
         if (yearsFilter != nullptr) {
 
             int startYear = std::get<0>(yearsFilter[0]);
@@ -507,7 +543,22 @@ void Areas::populateFromWelshStatsJSON(std::istream &is, const BethYw::SourceCol
 }
 
 /*
-  This function imports CSV files that contain a single measure. The 
+  REFERENCES:
+  https://stackoverflow.com/questions/7726762/finding-all-occurrences-of-a-character-in-a-string
+  https://stackoverflow.com/questions/2340281/check-if-a-string-contains-a-string-in-c
+  http://www.cplusplus.com/reference/string/string/getline/
+  http://www.cplusplus.com/reference/istream/istream/getline/
+  https://en.cppreference.com/w/cpp/utility/tuple/get
+  https://stackoverflow.com/questions/43233894/tuple-stdget-not-working-for-variable-defined
+  -constant
+  https://www.geeksforgeeks.org/tuples-in-c/
+  http://www.cplusplus.com/reference/tuple/tuple/
+  https://en.cppreference.com/w/cpp/utility/tuple
+  https://stackoverflow.com/questions/11279715/nullptr-and-checking-if-a-pointer-points-to-a-valid
+  -object
+  https://stackoverflow.com/questions/2099882/checking-for-a-null-object-in-c
+
+  This function imports CSV files that contain a single measure. The
   CSV file consists of columns containing the authority code and years.
   Each row contains an authority code and values for each year (or no value
   if the data doesn't exist).
@@ -592,6 +643,7 @@ void Areas::populateFromAuthorityByYearCSV(std::istream &is, const BethYw::Sourc
 
     try {
 
+        //get years from the first line of the file.
         if (std::getline(is, str)) {
 
             std::vector<int> commas;
@@ -613,12 +665,14 @@ void Areas::populateFromAuthorityByYearCSV(std::istream &is, const BethYw::Sourc
             }
         }
 
+        //get values from the rest of the file.
         while (std::getline(is, str)) {
 
             std::vector<double> values;
             std::vector<int> commas;
             Measure measure = Measure(measureCodename, measureLabel);
 
+            //get all occurrences of commas from the line.
             for (unsigned int i = 0; i < str.size(); i++) {
 
                 if (str[i] == ',') {
@@ -630,6 +684,7 @@ void Areas::populateFromAuthorityByYearCSV(std::istream &is, const BethYw::Sourc
             std::string authorityCode = str.substr(0, commas[0]);
             Area area = Area(authorityCode);
 
+            //add values in between commas to list.
             for (unsigned int j = 0; j < commas.size(); j++) {
 
                 double value = std::stod(str.substr(commas[j] + 1,
@@ -657,6 +712,7 @@ void Areas::populateFromAuthorityByYearCSV(std::istream &is, const BethYw::Sourc
                 }
             }
 
+            //areas filtering.
             if (areasFilter != nullptr && !areasFilter->empty()) {
 
                 for (auto it = eng.begin(); it != eng.end(); it++) {
@@ -671,8 +727,8 @@ void Areas::populateFromAuthorityByYearCSV(std::istream &is, const BethYw::Sourc
 
                 for (auto it = areasFilter->begin(); it != areasFilter->end(); it++) {
 
-                    bool foundEng = eng.find(*it) != eng.npos;
-                    bool foundCym = cym.find(*it) != cym.npos;
+                    bool foundEng = eng.find(*it) != std::string::npos;
+                    bool foundCym = cym.find(*it) != std::string::npos;
 
                     if (!foundEng && !foundCym && authorityCode != *it) {
 
@@ -691,6 +747,7 @@ void Areas::populateFromAuthorityByYearCSV(std::istream &is, const BethYw::Sourc
                 *it = std::tolower(*it);
             }
 
+            //measures filtering.
             if (measuresFilter != nullptr && !measuresFilter->empty()) {
 
                 for (auto it = measuresFilter->begin(); it != measuresFilter->end(); it++) {
@@ -707,6 +764,7 @@ void Areas::populateFromAuthorityByYearCSV(std::istream &is, const BethYw::Sourc
                 }
             }
 
+            //years filtering.
             if (yearsFilter != nullptr) {
 
                 int startYear = std::get<0>(yearsFilter[0]);
@@ -729,14 +787,14 @@ void Areas::populateFromAuthorityByYearCSV(std::istream &is, const BethYw::Sourc
                 }
             }
 
-            std::map<int, double> measureYears = measure.getYears();
+            int i = 0;
 
-            for (auto it = measureYears.begin(); it != measureYears.end(); it++) {
+            for (auto it = years.begin(); it != years.end(); it++) {
 
-                if (it->second == 0) {
+                it->second = values[i];
 
-                    measureYears.erase(it);
-                }
+                measure.setValue(it->first, it->second);
+                i++;
             }
 
             if (areasValid && measuresValid) {
@@ -937,6 +995,11 @@ void Areas::populate(std::istream &is, const BethYw::SourceDataType &type,
 }
 
 /*
+  REFERENCES:
+  https://github.com/nlohmann/json/issues/2046
+  https://nlohmann.github
+  .io/json/doxygen/classnlohmann_1_1basic__json_a5c99855f3e35ff35558cb46139b785f8.html
+
   Convert this Areas object, and all its containing Area instances, and
   the Measure instances within those, to values.
 
@@ -1026,24 +1089,45 @@ std::string Areas::toJSON() const {
           auto languages = it->second.getLanguages();
           auto measures = it->second.getMeasures();
 
+          if (!names.empty()) {
+
+              names.clear();
+          }
+
+          //convert names to json.
           for (auto it1 = languages.begin(); it1 != languages.end(); it1++) {
 
               names[it1->first] = it1->second;
           }
 
+          //convert years to json.
           for (auto it2 = measures.begin(); it2 != measures.end(); it2++) {
 
               auto currentYears = it2->second.getYears();
+
+              if (!years.empty()) {
+
+                  years.clear();
+              }
 
               for (auto it3 = currentYears.begin(); it3 != currentYears.end(); it3++) {
 
                   years[std::to_string(it3->first)] = it3->second;
               }
 
-              measuresjson[it2->first] = years;
+              //convert measures to json.
+              measuresjson[it2->second.getCodename()] = years;
           }
 
-          j[it->first] = {{"measures", measuresjson}, {"names", names}};
+          //add all values to main json object.
+          if (measures.empty()) {
+
+              j[it->first] = {{"names", names}};
+
+          } else {
+
+              j[it->first] = {{"measures", measuresjson}, {"names", names}};
+          }
       }
   }
   
@@ -1051,6 +1135,14 @@ std::string Areas::toJSON() const {
 }
 
 /*
+  REFERENCES:
+  https://stackoverflow.com/questions/49000762/c-ostream-operator-overloading-text-formatting
+  -while-trying-to-skip-over-inter
+  https://stackoverflow.com/questions/49332013/adding-a-new-line-after-stdostream-output-without
+  -explicitly-calling-it
+  https://stackoverflow.com/questions/35399642/c-ostream-overloading-problems
+  https://www.codegrepper.com/code-examples/cpp/overloading+ostream+operator+c%2B%2B
+
   Overload the << operator to print all of the imported data.
 
   Output should be formatted like the following to pass the tests. Areas should
